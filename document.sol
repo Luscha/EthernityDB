@@ -7,7 +7,7 @@ contract Document is DocumentAbstract {
     dataLen = len;
     collection = _c;
 
-    for (uint256 i = 0; i < len; i++) {
+    for (uint64 i = 0; i < len; i++) {
       data.push(_data[i]);
     }
   }
