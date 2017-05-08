@@ -22,11 +22,11 @@ contract Database is DBAbstract {
     return collectionsByName[driver.stringToBytes32(strName)];
   }
 
-  function queryInsert(string collection, byte[] data) returns (uint256 id) {
+  function queryInsert(string collection, byte[] data) returns (bytes12 id) {
     if (address(getCollection(collection)) == 0x0) throw;
 
     CollectionAbstract c = collectionsByName[driver.stringToBytes32(collection)];
-    id = driver.getUniqueID();
+    id = driver.getUniqueID(data);
     DocumentAbstract d = c.newDocument(id, data);
     driver.parseDocumentData(data, d, c);
   }

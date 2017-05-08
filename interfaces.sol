@@ -8,7 +8,7 @@ contract DriverAbstract {
 
   function parseDocumentData(byte[] data, DocumentAbstract doc, CollectionAbstract col);
 
-  function getUniqueID() constant returns (uint256 id);
+  function getUniqueID(byte[] seed) constant returns (bytes12);
   function stringToBytes32(string input) constant returns (bytes32);
   function bytes32ArrayToString(bytes32[] data) constant returns (string);
 }
@@ -24,19 +24,19 @@ contract DBAbstract {
   function newCollection(string strName) returns (CollectionAbstract);
   function getCollection(string strName) constant returns (CollectionAbstract);
 
-  function queryInsert(string collection, byte[] data) returns (uint256 id);
+  function queryInsert(string collection, byte[] data) returns (bytes12 id);
   function queryFind(string collection, byte[] query) constant;
 }
 
 contract CollectionAbstract {
-  mapping (uint256 => DocumentAbstract) public documentByID;
+  mapping (bytes12 => DocumentAbstract) public documentByID;
   DocumentAbstract[] public documentArray;
 
   DBAbstract internal db;
   string public name;
   uint64 public count;
 
-  function newDocument(uint256 _id, byte[] data) returns (DocumentAbstract);
+  function newDocument(bytes12 _id, byte[] data) returns (DocumentAbstract);
   function newEmbeedDocument(DocumentAbstract doc, string key, byte[] data, uint64 len) returns (DocumentAbstract);
 }
 
@@ -48,7 +48,7 @@ contract DocumentAbstract {
   CollectionAbstract internal collection;
   byte[] public data;
   uint256 public dataLen;
-  uint256 public id;
+  bytes12 public id;
 
   function setKeyIndex(string key, uint64 index);
   function setKeyType(string key, uint8 _type);

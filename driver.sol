@@ -138,14 +138,34 @@ contract Driver is DriverAbstract {
     }
   }
 
-  function getUniqueID() constant returns (uint256 id) {
-    uint256 nBlocHash = 0;
+  function getUniqueID(byte[] seed) constant returns (bytes12 id) {
+    // 4 bit blockhash
+    // 3 bit hash(seed, msg.sender)
+    // 2 bit timestamp
+    // 3 bit random
+    bytes32 nBlocHash = 1;
     for (uint16 i = 1; i < block.number && i < 254; i++) {
       bytes32 blockSha3 = sha3(block.blockhash(block.number - i), nBlocHash);
-      nBlocHash = uint256(sha3(blockSha3, nBlocHash));
+      nBlocHash = sha3(blockSha3, nBlocHash);
     }
+    bytes32 seedSha3 = sha3(seed, msg.sender);
     bytes32 timeSha3 = sha3(block.timestamp, msg.sender);
-    return uint256(sha3(nBlocHash, timeSha3));
+    bytes32 randomHash = sha3(sha3(nBlocHash, timeSha3), seed);
+
+    for (uint8 j = 0; j < 12; j++) {
+      if (j < 4) {
+        id |= bytes12(nBlocHash[j]) >> (j * 8);
+      } else if (j < 7) {
+        id |= bytes12(seedSha3[j]) >> (j * 8);
+      } else if (j < 9) {
+        id |= bytes12(timeSha3[j]) >> (j * 8);
+      } else {
+        uint8 index = uint8(uint256(randomHash) % 32);
+        id |= bytes12(randomHash[index]) >> (j * 8);
+        randomHash = sha3(randomHash, seedSha3);
+      }
+
+    }
   }
 
   function stringToBytes32(string input) constant returns (bytes32 bRet) {
