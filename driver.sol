@@ -62,12 +62,14 @@ document which contains the embeed document provided (not strictly equal):
 */
 import "lib/stringUtils.sol";
 import "lib/bytesUtils.sol";
+import "lib/bytes32Utils.sol";
 import "interfaces.sol";
 import "database.sol";
 
 contract Driver is DriverAbstract {
   using StringUtils for string;
   using BytesUtils for byte[];
+  using Bytes32Utils for bytes32[];
 
   function newDatabase(string strName, bool bPrivate) returns (DBAbstract db) {
     if (address(getDatabase(msg.sender, strName)) != 0x0) throw;
@@ -81,7 +83,7 @@ contract Driver is DriverAbstract {
 
   function parseDocumentData(byte[] data, DocumentKeyTreeAbstract docTree, DocumentAbstract doc) {
     // Skip first 4 BYTE (int32 = Doc length)
-    for (uint64 i = 4; i < data.length; i++) {
+    for (uint64 i = 4; i < data.length - 1; i++) {
         uint8 bType = uint8(data[i]);
         // check type validity
         if (bType > 0x12 || bType == 0x00 || bType == 0x05  || bType == 0x06 ||
@@ -91,38 +93,27 @@ contract Driver is DriverAbstract {
 
         uint64 u64ToSkip = 1;
         uint64 u64NameLen = 0;
+        bytes32 b32Name = 0;
 
-        for (uint64 j = 0; data[i + j + u64ToSkip] != 0x00; j++) {
-          u64NameLen++;
-        }
-        // get also the null char
-        u64NameLen++;
-
-        bytes memory byteName = new bytes(u64NameLen);
-
-        for (j = 0; j < u64NameLen; j++) {
-          byteName[j] = data[i + j + u64ToSkip];
-        }
+        (b32Name, u64NameLen) = data.getStringAsBytes32Chopped(i + u64ToSkip);
 
         u64ToSkip += u64NameLen;
 
-        docTree.setKeyIndex(string(byteName), i + u64ToSkip);
-        docTree.setKeyType(string(byteName), bType);
+        docTree.setKeyIndex(b32Name, i + u64ToSkip);
+        docTree.setKeyType(b32Name, bType);
 
         if (bType == 0x01) {
-          u64ToSkip += 4;
+          u64ToSkip += 8;
         } else if (bType == 0x02 || bType == 0x03 || bType == 0x04) {
           uint64 nDataLen = uint64(int32(data.getLittleUint32Mem(i + u64ToSkip)));
-          // get also the null char
-          nDataLen += 1;
 
           // Recursive call for embeeded documents
           if (bType == 0x03 || bType == 0x04) {
-            byte[] memory embDoc = new byte[](uint64(nDataLen + 4));
-            for (uint64 k = 0; k < nDataLen + 4; k++) {
-              embDoc[k] = data[i + u64ToSkip];
+            byte[] memory embDoc = new byte[](uint64(nDataLen));
+            for (uint64 k = 0; k < nDataLen; k++) {
+              embDoc[k] = data[i + k + u64ToSkip];
             }
-            DocumentKeyTreeAbstract embD = doc.addTreeNode(string(byteName), docTree);
+            DocumentKeyTreeAbstract embD = doc.addTreeNode(b32Name, docTree);
             parseDocumentData(embDoc, embD, doc);
           }
 
@@ -137,27 +128,23 @@ contract Driver is DriverAbstract {
           u64ToSkip += 8;
         }
 
-        i += u64ToSkip;
+        i += u64ToSkip - 1;
     }
   }
 
   function getUniqueID(byte[] seed) constant returns (bytes12 id) {
-    // 4 bit blockhash
+    // 4 bit blockSha3
     // 3 bit hash(seed, msg.sender)
     // 2 bit timestamp
     // 3 bit random
-    bytes32 nBlocHash = 1;
-    for (uint16 i = 1; i < block.number && i < 254; i++) {
-      bytes32 blockSha3 = sha3(block.blockhash(block.number - i), nBlocHash);
-      nBlocHash = sha3(blockSha3, nBlocHash);
-    }
+    bytes32 blockSha3 = sha3(block.blockhash(block.number - 1), msg.sender);
     bytes32 seedSha3 = sha3(seed, msg.sender);
     bytes32 timeSha3 = sha3(block.timestamp, msg.sender);
-    bytes32 randomHash = sha3(sha3(nBlocHash, timeSha3), seed);
+    bytes32 randomHash = sha3(sha3(blockSha3, timeSha3), seed);
 
     for (uint8 j = 0; j < 12; j++) {
       if (j < 4) {
-        id |= bytes12(nBlocHash[j]) >> (j * 8);
+        id |= bytes12(blockSha3[j]) >> (j * 8);
       } else if (j < 7) {
         id |= bytes12(seedSha3[j]) >> (j * 8);
       } else if (j < 9) {

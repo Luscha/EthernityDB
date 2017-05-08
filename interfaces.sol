@@ -45,21 +45,21 @@ contract DocumentAbstract {
   uint256 public dataLen;
   bytes12 public id;
 
-  function getKeyTree() returns (DocumentKeyTreeAbstract);
-  function addTreeNode(string nodeName, DocumentKeyTreeAbstract tree) returns (DocumentKeyTreeAbstract);
+  function getKeyTree() constant returns (DocumentKeyTreeAbstract);
+  function addTreeNode(bytes32 nodeName, DocumentKeyTreeAbstract tree) returns (DocumentKeyTreeAbstract);
 }
 
 contract DocumentKeyTreeAbstract {
-  mapping (string => uint64)  internal keyIndex;
-  mapping (string => uint8)   internal keyType;
-  mapping (string => DocumentKeyTreeAbstract)  internal embeedDocument;
+  mapping (bytes32 => uint64)  internal keyIndex;
+  mapping (bytes32 => uint8)   internal keyType;
+  mapping (bytes32 => DocumentKeyTreeAbstract)  internal embeedDocument;
 
-  function setKeyIndex(string key, uint64 index);
-  function setKeyType(string key, uint8 _type);
+  function setKeyIndex(bytes32 key, uint64 index);
+  function setKeyType(bytes32 key, uint8 _type);
 
   function getKeyIndex(string key) constant returns (uint64);
   function getKeyType(string key) constant returns (uint8);
 
-  function setEmbeededDocumentTree(string key, DocumentKeyTreeAbstract doc);
+  function setEmbeededDocumentTree(bytes32 key, DocumentKeyTreeAbstract doc);
   function getEmbeededDocumentTree(string key) returns (DocumentKeyTreeAbstract);
 }

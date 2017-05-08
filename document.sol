@@ -1,7 +1,10 @@
 pragma solidity ^0.4.11;
 import "interfaces.sol";
+import "lib/stringUtils.sol";
 
 contract Document is DocumentAbstract {
+  using StringUtils for string;
+
   function Document(bytes12 _id, byte[] _data, uint64 len, CollectionAbstract _c) {
     id = _id;
     dataLen = len;
@@ -13,11 +16,11 @@ contract Document is DocumentAbstract {
     }
   }
 
-  function getKeyTree() returns (DocumentKeyTreeAbstract) {
+  function getKeyTree() constant returns (DocumentKeyTreeAbstract) {
     return keyTree;
   }
 
-  function addTreeNode(string nodeName, DocumentKeyTreeAbstract tree) returns (DocumentKeyTreeAbstract) {
+  function addTreeNode(bytes32 nodeName, DocumentKeyTreeAbstract tree) returns (DocumentKeyTreeAbstract) {
     DocumentTree newNode = new DocumentTree();
     tree.setEmbeededDocumentTree(nodeName, newNode);
     return newNode;
@@ -25,27 +28,29 @@ contract Document is DocumentAbstract {
 }
 
 contract DocumentTree is DocumentKeyTreeAbstract {
-  function setKeyIndex(string key, uint64 index) {
+  using StringUtils for string;
+
+  function setKeyIndex(bytes32 key, uint64 index) {
     keyIndex[key] = index;
   }
 
-  function setKeyType(string key, uint8 _type) {
+  function setKeyType(bytes32 key, uint8 _type) {
     keyType[key] = _type;
   }
 
   function getKeyIndex(string key) constant returns (uint64) {
-    return keyIndex[key];
+    return keyIndex[key.toBytes32()];
   }
 
   function getKeyType(string key) constant returns (uint8) {
-    return keyType[key];
+    return keyType[key.toBytes32()];
   }
 
-  function setEmbeededDocumentTree(string key, DocumentKeyTreeAbstract doc) {
+  function setEmbeededDocumentTree(bytes32 key, DocumentKeyTreeAbstract doc) {
     embeedDocument[key] = doc;
   }
 
   function getEmbeededDocumentTree(string key) returns (DocumentKeyTreeAbstract) {
-    return embeedDocument[key];
+    return embeedDocument[key.toBytes32()];
   }
 }
