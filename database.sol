@@ -1,8 +1,11 @@
 pragma solidity ^0.4.11;
+import "lib/stringUtils.sol";
 import "interfaces.sol";
 import "collection.sol";
 
 contract Database is DBAbstract {
+  using StringUtils for string;
+
   function Database(string strName, bool bPrivate, DriverAbstract _driver) {
     owner = tx.origin;
     name = strName;
@@ -15,17 +18,17 @@ contract Database is DBAbstract {
     if (true == isPrivate && tx.origin != owner) throw;
 
     c = new Collection(strName, this);
-    collectionsByName[driver.stringToBytes32(strName)] = c;
+    collectionsByName[strName.toBytes32()] = c;
   }
 
   function getCollection(string strName) constant returns (CollectionAbstract) {
-    return collectionsByName[driver.stringToBytes32(strName)];
+    return collectionsByName[strName.toBytes32()];
   }
 
   function queryInsert(string collection, byte[] data) returns (bytes12 id) {
     if (address(getCollection(collection)) == 0x0) throw;
 
-    CollectionAbstract c = collectionsByName[driver.stringToBytes32(collection)];
+    CollectionAbstract c = collectionsByName[collection.toBytes32()];
     id = driver.getUniqueID(data);
     DocumentAbstract d = c.newDocument(id, data);
     driver.parseDocumentData(data, d, c);

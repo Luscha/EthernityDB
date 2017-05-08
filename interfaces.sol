@@ -9,7 +9,6 @@ contract DriverAbstract {
   function parseDocumentData(byte[] data, DocumentAbstract doc, CollectionAbstract col);
 
   function getUniqueID(byte[] seed) constant returns (bytes12);
-  function stringToBytes32(string input) constant returns (bytes32);
   function bytes32ArrayToString(bytes32[] data) constant returns (string);
 }
 

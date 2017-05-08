@@ -61,18 +61,20 @@ document which contains the embeed document provided (not strictly equal):
     -> select("\n6F": [ { qty: 25 }, { size: { h: { "\n6D": 25 } } ])
 */
 
+import "lib/stringUtils.sol";
 import "interfaces.sol";
 import "database.sol";
 
 contract Driver is DriverAbstract {
+  using StringUtils for string;
   function newDatabase(string strName, bool bPrivate) returns (DBAbstract db) {
     if (address(getDatabase(msg.sender, strName)) != 0x0) throw;
     db = new Database(strName, bPrivate, this);
-    databasesByName[msg.sender][stringToBytes32(strName)] = db;
+    databasesByName[msg.sender][strName.toBytes32()] = db;
   }
 
   function getDatabase(address owner, string strName) constant returns (DBAbstract) {
-    return databasesByName[owner][stringToBytes32(strName)];
+    return databasesByName[owner][strName.toBytes32()];
   }
 
   function parseDocumentData(byte[] data, DocumentAbstract doc, CollectionAbstract col) {
@@ -165,12 +167,6 @@ contract Driver is DriverAbstract {
         randomHash = sha3(randomHash, seedSha3);
       }
 
-    }
-  }
-
-  function stringToBytes32(string input) constant returns (bytes32 bRet) {
-    assembly {
-        bRet := mload(add(input, 32))
     }
   }
 
