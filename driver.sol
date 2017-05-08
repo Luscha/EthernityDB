@@ -60,13 +60,15 @@ document which contains the embeed document provided (not strictly equal):
   -> select * where qty = 25 or size.h >= 15
     -> select("\n6F": [ { qty: 25 }, { size: { h: { "\n6D": 25 } } ])
 */
-
 import "lib/stringUtils.sol";
+import "lib/bytesUtils.sol";
 import "interfaces.sol";
 import "database.sol";
 
 contract Driver is DriverAbstract {
   using StringUtils for string;
+  using BytesUtils for byte[];
+
   function newDatabase(string strName, bool bPrivate) returns (DBAbstract db) {
     if (address(getDatabase(msg.sender, strName)) != 0x0) throw;
     db = new Database(strName, bPrivate, this);
@@ -93,8 +95,7 @@ contract Driver is DriverAbstract {
         for (uint64 j = 0; data[i + j + u64ToSkip] != 0x00; j++) {
           u64NameLen++;
         }
-
-        // Add 1 to u64NameLen to take the null char
+        // get also the null char
         u64NameLen++;
 
         bytes memory byteName = new bytes(u64NameLen);
@@ -103,23 +104,23 @@ contract Driver is DriverAbstract {
           byteName[j] = data[i + j + u64ToSkip];
         }
 
-        doc.setKeyIndex(string(byteName), i + u64ToSkip + u64NameLen);
+        u64ToSkip += u64NameLen;
+
+        doc.setKeyIndex(string(byteName), i + u64ToSkip);
         doc.setKeyType(string(byteName), bType);
 
         if (bType == 0x01) {
           u64ToSkip += 4;
         } else if (bType == 0x02 || bType == 0x03 || bType == 0x04) {
-          uint64 nDataLen = uint64(data[i + u64ToSkip + u64NameLen]) << 24;
-          nDataLen |= uint64(data[i + u64ToSkip + u64NameLen + 1]) << 16;
-          nDataLen |= uint64(data[i + u64ToSkip + u64NameLen + 2]) << 8;
-          nDataLen |= uint64(data[i + u64ToSkip + u64NameLen + 3]);
+          uint64 nDataLen = uint64(int32(data.getLittleUint32Mem(i + u64ToSkip)));
+          // get also the null char
           nDataLen += 1;
 
           // Recursive call for embeeded documents
           if (bType == 0x03 || bType == 0x04) {
-            byte[] memory embDoc = new byte[](nDataLen);
+            byte[] memory embDoc = new byte[](uint64(nDataLen));
             for (uint64 k = 0; k < nDataLen; k++) {
-              embDoc[k] = data[i + nDataLen + 4];
+              embDoc[k] = data[i + u64ToSkip + 4];
             }
             DocumentAbstract embD = col.newEmbeedDocument(doc, string(byteName), embDoc, nDataLen);
             parseDocumentData(embDoc, embD, col);
@@ -136,7 +137,7 @@ contract Driver is DriverAbstract {
           u64ToSkip += 8;
         }
 
-        i += u64ToSkip + u64NameLen;
+        i += u64ToSkip;
     }
   }
 
