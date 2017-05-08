@@ -31,7 +31,7 @@ contract Database is DBAbstract {
     CollectionAbstract c = collectionsByName[collection.toBytes32()];
     id = driver.getUniqueID(data);
     DocumentAbstract d = c.newDocument(id, data);
-    driver.parseDocumentData(data, d, c);
+    driver.parseDocumentData(data, d.getKeyTree(), d);
   }
 
   function queryFind(string collection, byte[] query) constant {

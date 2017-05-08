@@ -6,7 +6,7 @@ contract DriverAbstract {
   function newDatabase(string strName, bool bPrivate) returns (DBAbstract);
   function getDatabase(address owner, string strName) constant returns (DBAbstract);
 
-  function parseDocumentData(byte[] data, DocumentAbstract doc, CollectionAbstract col);
+  function parseDocumentData(byte[] data, DocumentKeyTreeAbstract docTree, DocumentAbstract doc);
 
   function getUniqueID(byte[] seed) constant returns (bytes12);
   function bytes32ArrayToString(bytes32[] data) constant returns (string);
@@ -36,18 +36,24 @@ contract CollectionAbstract {
   uint64 public count;
 
   function newDocument(bytes12 _id, byte[] data) returns (DocumentAbstract);
-  function newEmbeedDocument(DocumentAbstract doc, string key, byte[] data, uint64 len) returns (DocumentAbstract);
 }
 
 contract DocumentAbstract {
-  mapping (string => uint64)  internal keyIndex;
-  mapping (string => uint8)   internal keyType;
-  mapping (string => DocumentAbstract)  internal embeedDocument;
+  DocumentKeyTreeAbstract internal keyTree;
 
   CollectionAbstract internal collection;
   byte[] public data;
   uint256 public dataLen;
   bytes12 public id;
+
+  function getKeyTree() returns (DocumentKeyTreeAbstract);
+  function addTreeNode(string nodeName, DocumentKeyTreeAbstract tree) returns (DocumentKeyTreeAbstract);
+}
+
+contract DocumentKeyTreeAbstract {
+  mapping (string => uint64)  internal keyIndex;
+  mapping (string => uint8)   internal keyType;
+  mapping (string => DocumentKeyTreeAbstract)  internal embeedDocument;
 
   function setKeyIndex(string key, uint64 index);
   function setKeyType(string key, uint8 _type);
@@ -55,6 +61,6 @@ contract DocumentAbstract {
   function getKeyIndex(string key) constant returns (uint64);
   function getKeyType(string key) constant returns (uint8);
 
-  function setEmbeededDocument(string key, DocumentAbstract doc);
-  function getEmbeededDocument(string key) returns (DocumentAbstract);
+  function setEmbeededDocumentTree(string key, DocumentKeyTreeAbstract doc);
+  function getEmbeededDocumentTree(string key) returns (DocumentKeyTreeAbstract);
 }

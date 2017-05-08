@@ -79,7 +79,7 @@ contract Driver is DriverAbstract {
     return databasesByName[owner][strName.toBytes32()];
   }
 
-  function parseDocumentData(byte[] data, DocumentAbstract doc, CollectionAbstract col) {
+  function parseDocumentData(byte[] data, DocumentKeyTreeAbstract docTree, DocumentAbstract doc) {
     // Skip first 4 BYTE (int32 = Doc length)
     for (uint64 i = 4; i < data.length; i++) {
         uint8 bType = uint8(data[i]);
@@ -106,8 +106,8 @@ contract Driver is DriverAbstract {
 
         u64ToSkip += u64NameLen;
 
-        doc.setKeyIndex(string(byteName), i + u64ToSkip);
-        doc.setKeyType(string(byteName), bType);
+        docTree.setKeyIndex(string(byteName), i + u64ToSkip);
+        docTree.setKeyType(string(byteName), bType);
 
         if (bType == 0x01) {
           u64ToSkip += 4;
@@ -118,12 +118,12 @@ contract Driver is DriverAbstract {
 
           // Recursive call for embeeded documents
           if (bType == 0x03 || bType == 0x04) {
-            byte[] memory embDoc = new byte[](uint64(nDataLen));
-            for (uint64 k = 0; k < nDataLen; k++) {
-              embDoc[k] = data[i + u64ToSkip + 4];
+            byte[] memory embDoc = new byte[](uint64(nDataLen + 4));
+            for (uint64 k = 0; k < nDataLen + 4; k++) {
+              embDoc[k] = data[i + u64ToSkip];
             }
-            DocumentAbstract embD = col.newEmbeedDocument(doc, string(byteName), embDoc, nDataLen);
-            parseDocumentData(embDoc, embD, col);
+            DocumentKeyTreeAbstract embD = doc.addTreeNode(string(byteName), docTree);
+            parseDocumentData(embDoc, embD, doc);
           }
 
           u64ToSkip += nDataLen + 4;
@@ -167,7 +167,6 @@ contract Driver is DriverAbstract {
         id |= bytes12(randomHash[index]) >> (j * 8);
         randomHash = sha3(randomHash, seedSha3);
       }
-
     }
   }
 

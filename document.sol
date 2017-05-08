@@ -6,12 +6,25 @@ contract Document is DocumentAbstract {
     id = _id;
     dataLen = len;
     collection = _c;
+    keyTree = new DocumentTree();
 
     for (uint64 i = 0; i < len; i++) {
       data.push(_data[i]);
     }
   }
 
+  function getKeyTree() returns (DocumentKeyTreeAbstract) {
+    return keyTree;
+  }
+
+  function addTreeNode(string nodeName, DocumentKeyTreeAbstract tree) returns (DocumentKeyTreeAbstract) {
+    DocumentTree newNode = new DocumentTree();
+    tree.setEmbeededDocumentTree(nodeName, newNode);
+    return newNode;
+  }
+}
+
+contract DocumentTree is DocumentKeyTreeAbstract {
   function setKeyIndex(string key, uint64 index) {
     keyIndex[key] = index;
   }
@@ -28,11 +41,11 @@ contract Document is DocumentAbstract {
     return keyType[key];
   }
 
-  function setEmbeededDocument(string key, DocumentAbstract doc) {
+  function setEmbeededDocumentTree(string key, DocumentKeyTreeAbstract doc) {
     embeedDocument[key] = doc;
   }
 
-  function getEmbeededDocument(string key) returns (DocumentAbstract) {
+  function getEmbeededDocumentTree(string key) returns (DocumentKeyTreeAbstract) {
     return embeedDocument[key];
   }
 }

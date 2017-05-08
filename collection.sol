@@ -20,9 +20,4 @@ contract Collection is CollectionAbstract {
     documentArray.push(d);
     count++;
   }
-
-  function newEmbeedDocument(DocumentAbstract p, string key, byte[] data, uint64 len) returns (DocumentAbstract c) {
-    c = new Document(0, data, len, this);
-    p.setEmbeededDocument(key, c);
-  }
 }
