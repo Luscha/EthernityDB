@@ -11,7 +11,7 @@ contract Collection is CollectionAbstract {
   }
 
   function newDocument(bytes12 _id, byte[] data) returns (DocumentAbstract d) {
-    if (documentByID[_id].id() != 0) throw;
+    if (address(documentByID[_id]) != 0x0) throw;
     if (true == db.isPrivate() && tx.origin != db.owner()) throw;
     if (msg.sender != address(db)) throw;
 
