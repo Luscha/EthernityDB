@@ -66,9 +66,9 @@ contract DocumentKeyTreeAbstract {
   function setKeyIndex(bytes32 key, uint64 index);
   function setKeyType(bytes32 key, uint8 _type);
 
-  function getKeyIndex(string key) constant returns (uint64);
-  function getKeyType(string key) constant returns (uint8);
+  function getKeyIndex(bytes32 key) constant returns (uint64);
+  function getKeyType(bytes32 key) constant returns (uint8);
 
   function setEmbeededDocumentTree(bytes32 key, DocumentKeyTreeAbstract doc);
-  function getEmbeededDocumentTree(string key) returns (DocumentKeyTreeAbstract);
+  function getEmbeededDocumentTree(bytes32 key) returns (DocumentKeyTreeAbstract);
 }
