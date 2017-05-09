@@ -1,10 +1,9 @@
 pragma solidity ^0.4.11;
 import "interfaces.sol";
-import "database.sol";
 import "document.sol";
 
 contract Collection is CollectionAbstract {
-  function Collection(string strName, Database _db) {
+  function Collection(string strName, DBAbstract _db) {
     name = strName;
     db = _db;
     count = 0;
