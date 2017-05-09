@@ -14,7 +14,7 @@ contract Collection is CollectionAbstract {
     if (true == db.isPrivate() && tx.origin != db.owner()) throw;
     if (msg.sender != address(db)) throw;
 
-    d = new Document(_id, data, uint64(data.length), this);
+    d = new Document(_id, data, this);
     documentByID[_id] = d;
     documentArray.push(d);
     count++;

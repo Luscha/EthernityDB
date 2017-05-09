@@ -44,7 +44,6 @@ contract DocumentAbstract {
 
   CollectionAbstract internal collection;
   byte[] public data;
-  uint256 public dataLen;
   bytes12 public id;
 
   function getKeyTree() constant returns (DocumentKeyTreeAbstract);

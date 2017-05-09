@@ -5,13 +5,12 @@ import "lib/stringUtils.sol";
 contract Document is DocumentAbstract {
   using StringUtils for string;
 
-  function Document(bytes12 _id, byte[] _data, uint64 len, CollectionAbstract _c) {
+  function Document(bytes12 _id, byte[] _data, CollectionAbstract _c) {
     id = _id;
-    dataLen = len;
     collection = _c;
     keyTree = new DocumentTree();
 
-    for (uint64 i = 0; i < len; i++) {
+    for (uint64 i = 0; i < _data.length; i++) {
       data.push(_data[i]);
     }
   }
