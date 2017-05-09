@@ -12,7 +12,15 @@ contract DriverAbstract {
 }
 
 contract DBAbstract {
-  mapping (bytes32 => CollectionAbstract) public collectionsByName;
+  struct Collection {
+    mapping (bytes12 => DocumentAbstract) documentByID;
+    bytes12[] documentIDArray;
+    string name;
+    uint64 count;
+    bool init;
+  }
+
+  mapping (bytes32 => Collection) public collectionsByName;
 
   DriverAbstract internal driver;
   address public owner;
@@ -22,23 +30,13 @@ contract DBAbstract {
   function changeDriver(DriverAbstract newDriver);
   function getDriver() constant returns (DriverAbstract);
 
-  function newCollection(string strName) returns (CollectionAbstract);
-  function getCollection(string strName) constant returns (CollectionAbstract);
+  function newCollection(string strName);
+  function getCollection(string strName) constant internal returns (Collection storage);
+
+  function newDocument(string collection, bytes12 _id, byte[] data) internal returns (DocumentAbstract d);
 
   function queryInsert(string collection, byte[] data) returns (bytes12 id);
-  function queryFind(string collection, byte[] query) constant;
-}
-
-contract CollectionAbstract {
-  mapping (bytes12 => DocumentAbstract) public documentByID;
-  bytes12[] public documentIDArray;
-
-  DBAbstract internal db;
-  string public name;
-  uint64 public count;
-
-  function getDB() constant returns (DBAbstract);
-  function newDocument(bytes12 _id, byte[] data) returns (DocumentAbstract);
+  //function queryFind(string collection, byte[] query) constant;
 }
 
 contract DocumentAbstract {
@@ -52,7 +50,6 @@ contract DocumentAbstract {
   mapping (uint8 => DocumentKeyNode)  parentDocumentKeyNode;
   mapping (uint8 => DocumentKeyNode)  documentKeyNodeByID;
 
-  CollectionAbstract internal collection;
   DocumentKeyNode internal rootNode;
   DocumentKeyNode internal currentNode;
 
