@@ -61,14 +61,12 @@ document which contains the embeed document provided (not strictly equal):
     -> select("\n6F": [ { qty: 25 }, { size: { h: { "\n6D": 25 } } ])
 */
 import "lib/stringUtils.sol";
-import "lib/bytesUtils.sol";
-import "lib/bytes32Utils.sol";
+import "bsonparser/documentparser.sol";
 import "interfaces.sol";
 
 contract Driver is DriverAbstract {
   using StringUtils for string;
-  using BytesUtils for byte[];
-  using Bytes32Utils for bytes32[];
+  using DocumentParser for byte[];
 
   function registerDatabase(address owner, string strName, DBAbstract db) {
     if (address(getDatabase(owner, strName)) != 0x0) throw;
@@ -80,53 +78,44 @@ contract Driver is DriverAbstract {
   }
 
   function parseDocumentData(byte[] data, DocumentKeyTreeAbstract docTree, DocumentAbstract doc) {
+    int8 documentIndex = -1;
+    // For now we let only up to 8 nested document level
+    uint64[] memory embeedDocumentStack = new uint64[](8);
     // Skip first 4 BYTE (int32 = Doc length)
     for (uint64 i = 4; i < data.length - 1; i++) {
-        uint8 bType = uint8(data[i]);
+        // Select parent nodeTree if available
+        if (documentIndex >= 0 && embeedDocumentStack[uint8(documentIndex)] <= i) {
+          docTree = docTree.getParentocumentTree();
+          documentIndex--;
+        }
+
+        uint8 bType = 0;
+        bytes32 b32Name = 0;
+        uint64 nDataLen = 0;
+        uint64 nDataStart = 0;
+        (bType, b32Name, nDataLen, nDataStart) = data.nextKeyValue(i);
+
+        if (bType == 0x0) {
+          continue;
+        }
+
         // check type validity
         if (bType > 0x12 || bType == 0x00 || bType == 0x05  || bType == 0x06 ||
             bType == 0x09  || bType == 0x0B  || bType == 0x0C  || bType == 0x0D ||
             bType == 0x0E  || bType == 0x0F)
             throw;
 
-        uint64 u64ToSkip = 1;
-        uint64 u64NameLen = 0;
-        bytes32 b32Name = 0;
-
-        (b32Name, u64NameLen) = data.getStringAsBytes32Chopped(i + u64ToSkip);
-
-        u64ToSkip += u64NameLen;
-
-        docTree.setKeyIndex(b32Name, i + u64ToSkip);
+        docTree.setKeyIndex(b32Name, i + nDataStart);
         docTree.setKeyType(b32Name, bType);
 
-        if (bType == 0x01) {
-          u64ToSkip += 8;
-        } else if (bType == 0x02 || bType == 0x03 || bType == 0x04) {
-          uint64 nDataLen = uint64(int32(data.getLittleUint32Mem(i + u64ToSkip)));
-
-          // Recursive call for embeeded documents
-          if (bType == 0x03 || bType == 0x04) {
-            byte[] memory embDoc = new byte[](uint64(nDataLen));
-            for (uint64 k = 0; k < nDataLen; k++) {
-              embDoc[k] = data[i + k + u64ToSkip];
-            }
-            DocumentKeyTreeAbstract embD = doc.addTreeNode(b32Name, docTree);
-            parseDocumentData(embDoc, embD, doc);
-          }
-
-          u64ToSkip += nDataLen + 4;
-        } else if (bType == 0x07) {
-          u64ToSkip += 12;
-        } else if (bType == 0x08) {
-          u64ToSkip += 1;
-        } else if (bType == 0x10) {
-          u64ToSkip += 4;
-        } else if (bType == 0x11 || bType == 0x12) {
-          u64ToSkip += 8;
+        if (bType == 0x03 || bType == 0x04) {
+          if (documentIndex >= 7) throw;
+          docTree = doc.addTreeNode(b32Name, docTree);
+          embeedDocumentStack[uint8(++documentIndex)] = i + nDataLen - 1;
+          i += nDataStart - 1;
+        } else {
+          i += nDataLen - 1;
         }
-
-        i += u64ToSkip - 1;
     }
   }
 
