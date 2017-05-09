@@ -25,13 +25,23 @@ contract Document is DocumentAbstract {
 
   function addTreeNode(bytes32 nodeName, DocumentKeyTreeAbstract tree) returns (DocumentKeyTreeAbstract) {
     DocumentTree newNode = new DocumentTree();
+    newNode.setParentocumentTree(tree);
     tree.setEmbeededDocumentTree(nodeName, newNode);
     return newNode;
   }
 }
 
 contract DocumentTree is DocumentKeyTreeAbstract {
+  // For the future it might be better to use an array of bytes32
+  // that maps the structure of the data using the single bits
+  // Es:
+  // bytes32 keyMap = 00001100000011000000110000011
+  //  Where the 1s are the bytes where the key are
   using StringUtils for string;
+
+  function setParentocumentTree(DocumentKeyTreeAbstract parent) {
+    parentDocument = parent;
+  }
 
   function setKeyIndex(bytes32 key, uint64 index) {
     keyIndex[key] = index;

@@ -56,6 +56,9 @@ contract DocumentKeyTreeAbstract {
   mapping (bytes32 => uint64)  internal keyIndex;
   mapping (bytes32 => uint8)   internal keyType;
   mapping (bytes32 => DocumentKeyTreeAbstract)  internal embeedDocument;
+  DocumentKeyTreeAbstract internal parentDocument;
+
+  function setParentocumentTree(DocumentKeyTreeAbstract parent);
 
   function setKeyIndex(bytes32 key, uint64 index);
   function setKeyType(bytes32 key, uint8 _type);
