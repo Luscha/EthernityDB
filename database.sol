@@ -7,15 +7,22 @@ contract Database is DBAbstract {
   using StringUtils for string;
 
   function Database(string strName, bool bPrivate, DriverAbstract _driver) {
-    owner = tx.origin;
+    owner = msg.sender;
     name = strName;
     isPrivate = bPrivate;
     driver = _driver;
+    driver.registerDatabase(owner, strName, this);
+  }
+
+  function changeDriver(DriverAbstract newDriver) {
+    if (msg.sender != owner) throw;
+    driver = newDriver;
+    driver.registerDatabase(owner, name, this);
   }
 
   function newCollection(string strName) returns (CollectionAbstract c) {
     if (address(getCollection(strName)) != 0x0) throw;
-    if (true == isPrivate && tx.origin != owner) throw;
+    if (true == isPrivate && msg.sender != owner) throw;
 
     c = new Collection(strName, this);
     collectionsByName[strName.toBytes32()] = c;

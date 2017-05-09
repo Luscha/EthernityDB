@@ -19,6 +19,8 @@ contract DBAbstract {
   string public name;
   bool public isPrivate;
 
+  function changeDriver(DriverAbstract newDriver);
+
   function newCollection(string strName) returns (CollectionAbstract);
   function getCollection(string strName) constant returns (CollectionAbstract);
 
