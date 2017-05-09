@@ -64,16 +64,14 @@ import "lib/stringUtils.sol";
 import "lib/bytesUtils.sol";
 import "lib/bytes32Utils.sol";
 import "interfaces.sol";
-import "database.sol";
 
 contract Driver is DriverAbstract {
   using StringUtils for string;
   using BytesUtils for byte[];
   using Bytes32Utils for bytes32[];
 
-  function newDatabase(string strName, bool bPrivate) returns (DBAbstract db) {
-    if (address(getDatabase(msg.sender, strName)) != 0x0) throw;
-    db = new Database(strName, bPrivate, this);
+  function registerDatabase(address owner, string strName, DBAbstract db) {
+    if (address(getDatabase(owner, strName)) != 0x0) throw;
     databasesByName[msg.sender][strName.toBytes32()] = db;
   }
 

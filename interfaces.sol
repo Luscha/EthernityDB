@@ -3,7 +3,7 @@ pragma solidity ^0.4.11;
 contract DriverAbstract {
   mapping (address => mapping (bytes32 => DBAbstract)) public databasesByName;
 
-  function newDatabase(string strName, bool bPrivate) returns (DBAbstract);
+  function registerDatabase(address owner, string strName, DBAbstract db);
   function getDatabase(address owner, string strName) constant returns (DBAbstract);
 
   function parseDocumentData(byte[] data, DocumentKeyTreeAbstract docTree, DocumentAbstract doc);
