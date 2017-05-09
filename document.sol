@@ -15,6 +15,10 @@ contract Document is DocumentAbstract {
     }
   }
 
+  function getData() constant returns (byte[]) {
+    return data;
+  }
+
   function getKeyTree() constant returns (DocumentKeyTreeAbstract) {
     return keyTree;
   }

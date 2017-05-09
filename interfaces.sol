@@ -43,8 +43,10 @@ contract DocumentAbstract {
   DocumentKeyTreeAbstract internal keyTree;
 
   CollectionAbstract internal collection;
-  byte[] public data;
+  byte[] internal data;
   bytes12 public id;
+
+  function getData() constant returns (byte[]);
 
   function getKeyTree() constant returns (DocumentKeyTreeAbstract);
   function addTreeNode(bytes32 nodeName, DocumentKeyTreeAbstract tree) returns (DocumentKeyTreeAbstract);
