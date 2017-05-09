@@ -9,7 +9,6 @@ contract Document is DocumentAbstract {
   //  Where the 1s are the bytes where the key are
   function Document(bytes12 _id, byte[] _data) {
     id = _id;
-    currentNode = rootNode;
 
     for (uint64 i = 0; i < _data.length; i++) {
       data.push(_data[i]);
@@ -18,25 +17,5 @@ contract Document is DocumentAbstract {
 
   function getData() constant returns (byte[]) {
     return data;
-  }
-
-  function addEmbeededDocumentNode(bytes32 nodeName) {
-    DocumentKeyNode newNode = documentKeyNodeByID[currentKeyNode++];
-    newNode.nodeID = currentKeyNode;
-    currentNode.embeedDocument[nodeName] = newNode;
-    parentDocumentKeyNode[currentKeyNode] = currentNode;
-    currentNode = newNode;
-  }
-
-  function setParentDocumentNode() {
-    currentNode = parentDocumentKeyNode[currentNode.nodeID];
-  }
-
-  function setKeyIndex(bytes32 key, uint64 index) {
-    currentNode.keyIndex[key] = index;
-  }
-
-  function setKeyType(bytes32 key, uint8 _type) {
-    currentNode.keyType[key] = _type;
   }
 }
