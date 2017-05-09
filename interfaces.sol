@@ -6,7 +6,7 @@ contract DriverAbstract {
   function registerDatabase(address owner, string strName, DBAbstract db);
   function getDatabase(address owner, string strName) constant returns (DBAbstract);
 
-  function parseDocumentData(byte[] data, DocumentKeyTreeAbstract docTree, DocumentAbstract doc);
+  function parseDocumentData(byte[] data, DocumentAbstract doc);
 
   function getUniqueID(byte[] seed) constant returns (bytes12);
 }
@@ -42,33 +42,33 @@ contract CollectionAbstract {
 }
 
 contract DocumentAbstract {
-  DocumentKeyTreeAbstract internal keyTree;
+  struct DocumentKeyNode {
+    uint8 nodeID;
+    mapping (bytes32 => uint64)  keyIndex;
+    mapping (bytes32 => uint8)   keyType;
+    mapping (bytes32 => DocumentKeyNode)  embeedDocument;
+  }
+
+  mapping (uint8 => DocumentKeyNode)  parentDocumentKeyNode;
+  mapping (uint8 => DocumentKeyNode)  documentKeyNodeByID;
 
   CollectionAbstract internal collection;
+  DocumentKeyNode internal rootNode;
+  DocumentKeyNode internal currentNode;
+
   byte[] internal data;
   bytes12 public id;
+  uint8 internal currentKeyNode;
 
   function getData() constant returns (byte[]);
 
-  function getKeyTree() constant returns (DocumentKeyTreeAbstract);
-  function addTreeNode(bytes32 nodeName, DocumentKeyTreeAbstract tree) returns (DocumentKeyTreeAbstract);
-}
-
-contract DocumentKeyTreeAbstract {
-  mapping (bytes32 => uint64)  internal keyIndex;
-  mapping (bytes32 => uint8)   internal keyType;
-  mapping (bytes32 => DocumentKeyTreeAbstract)  internal embeedDocument;
-  DocumentKeyTreeAbstract internal parentDocument;
-
-  function setParentocumentTree(DocumentKeyTreeAbstract parent);
-  function getParentocumentTree() constant returns (DocumentKeyTreeAbstract);
+  function addEmbeededDocumentNode(bytes32 nodeName);
+  function setParentDocumentNode();
 
   function setKeyIndex(bytes32 key, uint64 index);
   function setKeyType(bytes32 key, uint8 _type);
 
-  function getKeyIndex(bytes32 key) constant returns (uint64);
-  function getKeyType(bytes32 key) constant returns (uint8);
-
-  function setEmbeededDocumentTree(bytes32 key, DocumentKeyTreeAbstract doc);
-  function getEmbeededDocumentTree(bytes32 key) returns (DocumentKeyTreeAbstract);
+  //function getKeyIndex(bytes32 key) constant returns (uint64);
+  //function getKeyType(bytes32 key) constant returns (uint8);
+  //function getEmbeededDocumentNode(bytes32 key) returns (DocumentKeyTreeAbstract);
 }

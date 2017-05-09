@@ -77,7 +77,7 @@ contract Driver is DriverAbstract {
     return databasesByName[owner][strName.toBytes32()];
   }
 
-  function parseDocumentData(byte[] data, DocumentKeyTreeAbstract docTree, DocumentAbstract doc) {
+  function parseDocumentData(byte[] data, DocumentAbstract doc) {
     int8 documentIndex = -1;
     // For now we let only up to 8 nested document level
     uint64[] memory embeedDocumentStack = new uint64[](8);
@@ -85,7 +85,7 @@ contract Driver is DriverAbstract {
     for (uint64 i = 4; i < data.length - 1; i++) {
         // Select parent nodeTree if available
         if (documentIndex >= 0 && embeedDocumentStack[uint8(documentIndex)] <= i) {
-          docTree = docTree.getParentocumentTree();
+          doc.setParentDocumentNode();
           documentIndex--;
         }
 
@@ -105,12 +105,12 @@ contract Driver is DriverAbstract {
             bType == 0x0E  || bType == 0x0F)
             throw;
 
-        docTree.setKeyIndex(b32Name, i + nDataStart);
-        docTree.setKeyType(b32Name, bType);
+        doc.setKeyIndex(b32Name, i + nDataStart);
+        doc.setKeyType(b32Name, bType);
 
         if (bType == 0x03 || bType == 0x04) {
           if (documentIndex >= 7) throw;
-          docTree = doc.addTreeNode(b32Name, docTree);
+          doc.addEmbeededDocumentNode(b32Name);
           embeedDocumentStack[uint8(++documentIndex)] = i + nDataLen - 1;
           i += nDataStart - 1;
         } else {
