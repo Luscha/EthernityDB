@@ -16,7 +16,7 @@ contract Collection is CollectionAbstract {
 
     d = new Document(_id, data, this);
     documentByID[_id] = d;
-    documentArray.push(d);
+    documentIDArray.push(_id);
     count++;
   }
 }

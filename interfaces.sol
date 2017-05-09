@@ -30,7 +30,7 @@ contract DBAbstract {
 
 contract CollectionAbstract {
   mapping (bytes12 => DocumentAbstract) public documentByID;
-  DocumentAbstract[] public documentArray;
+  bytes12[] public documentIDArray;
 
   DBAbstract internal db;
   string public name;
