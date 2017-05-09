@@ -9,6 +9,10 @@ contract Collection is CollectionAbstract {
     count = 0;
   }
 
+  function getDB() constant returns (DBAbstract) {
+    return db;
+  }
+
   function newDocument(bytes12 _id, byte[] data) returns (DocumentAbstract d) {
     if (address(documentByID[_id]) != 0x0) throw;
     if (true == db.isPrivate() && tx.origin != db.owner()) throw;

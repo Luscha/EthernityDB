@@ -20,6 +20,10 @@ contract Database is DBAbstract {
     driver.registerDatabase(owner, name, this);
   }
 
+  function getDriver() constant returns (DriverAbstract) {
+    return driver;
+  }
+
   function newCollection(string strName) returns (CollectionAbstract c) {
     if (address(getCollection(strName)) != 0x0) throw;
     if (true == isPrivate && msg.sender != owner) throw;

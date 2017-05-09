@@ -20,6 +20,7 @@ contract DBAbstract {
   bool public isPrivate;
 
   function changeDriver(DriverAbstract newDriver);
+  function getDriver() constant returns (DriverAbstract);
 
   function newCollection(string strName) returns (CollectionAbstract);
   function getCollection(string strName) constant returns (CollectionAbstract);
@@ -36,6 +37,7 @@ contract CollectionAbstract {
   string public name;
   uint64 public count;
 
+  function getDB() constant returns (DBAbstract);
   function newDocument(bytes12 _id, byte[] data) returns (DocumentAbstract);
 }
 
