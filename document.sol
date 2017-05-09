@@ -21,6 +21,7 @@ contract Document is DocumentAbstract {
   }
 
   function addTreeNode(bytes32 nodeName, DocumentKeyTreeAbstract tree) returns (DocumentKeyTreeAbstract) {
+    if (msg.sender != address(collection.getDB().getDriver())) throw;
     DocumentTree newNode = new DocumentTree();
     newNode.setParentocumentTree(tree);
     tree.setEmbeededDocumentTree(nodeName, newNode);
