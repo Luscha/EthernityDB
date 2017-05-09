@@ -59,6 +59,7 @@ contract DocumentKeyTreeAbstract {
   DocumentKeyTreeAbstract internal parentDocument;
 
   function setParentocumentTree(DocumentKeyTreeAbstract parent);
+  function getParentocumentTree() constant returns (DocumentKeyTreeAbstract);
 
   function setKeyIndex(bytes32 key, uint64 index);
   function setKeyType(bytes32 key, uint8 _type);

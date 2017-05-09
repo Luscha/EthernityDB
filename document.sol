@@ -43,6 +43,10 @@ contract DocumentTree is DocumentKeyTreeAbstract {
     parentDocument = parent;
   }
 
+  function getParentocumentTree()  constant returns (DocumentKeyTreeAbstract) {
+    return parentDocument;
+  }
+
   function setKeyIndex(bytes32 key, uint64 index) {
     keyIndex[key] = index;
   }
