@@ -25,8 +25,6 @@ string	::=	int32 (byte*) "\x00"	   String - The int32 is the number bytes in the
 cstring	::=	(byte*) "\x00"	         Zero or more modified UTF-8 encoded characters followed by '\x00'. The (byte*) MUST NOT contain '\x00', hence it is not full UTF-8.
 </code></pre>
 
-The driver will also use some reserved byte to identify logical operation over the SELECT closure.
-
 The AND operation is identified simply with a " , " that simply separates the keys of the closure (or the keys in a OR statement).
 
 
@@ -56,3 +54,11 @@ The AND operation is identified simply with a " , " that simply separates the ke
         <td>!=</td>
     </tr>
 </table>
+
+For the sake of simplicity
+--------------------------
+The NoSQL implementation accepts only documents with at most 8 level of embedded documents.
+The key must also be at most 30 character long.
+
+
+The driver will also use some reserved byte to identify logical operation over the SELECT closure.
