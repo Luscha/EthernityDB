@@ -6,7 +6,7 @@ contract DriverAbstract {
   function registerDatabase(address owner, string strName, DBAbstract db);
   function getDatabase(address owner, string strName) constant returns (DBAbstract);
 
-  function parseDocumentData(byte[] data, DBAbstract db, bytes32 c, bytes12 d);
+  function parseDocumentData(byte[] data, DBAbstract db, bytes12 d);
 
   function getUniqueID(byte[] seed) constant returns (bytes12);
 }
@@ -35,10 +35,10 @@ contract DBAbstract {
 
   function newDocument(string collection, bytes12 _id, byte[] data) internal returns (DocumentAbstract d);
 
-  function addEmbeededDocumentNode(bytes32 c, bytes12 d, bytes32 nodeName);
-  function setParentDocumentNode(bytes32 c, bytes12 d);
+  function addEmbeededDocumentNode(bytes12 d, bytes32 nodeName);
+  function setParentDocumentNode(bytes12 d);
 
-  function setKeyIndex(bytes32 c, bytes12 d, bytes32 key, uint64 index);
+  function setKeyIndex(bytes12 d, bytes32 key, uint64 index);
 
   function queryInsert(string collection, byte[] data) returns (bytes12 id);
   //function queryFind(string collection, byte[] query) constant;

@@ -8,7 +8,7 @@ contract Database is DBAbstract {
   using StringUtils for string;
   using DocumentKeyTree for DocumentKeyTree.DocumentKeyRoot;
 
-  mapping (bytes32 => mapping (bytes12 => DocumentKeyTree.DocumentKeyRoot))  documentKeyTrees;
+  mapping (bytes12 => DocumentKeyTree.DocumentKeyRoot)  documentKeyTrees;
 
   modifier OnlyDriver {
       if (msg.sender != address(driver)) throw;
@@ -62,18 +62,16 @@ contract Database is DBAbstract {
     c.count++;
   }
 
-  function addEmbeededDocumentNode(bytes32 c, bytes12 d, bytes32 nodeName) OnlyDriver {
-    documentKeyTrees[c][d].addChild(nodeName);
+  function addEmbeededDocumentNode(bytes12 d, bytes32 nodeName) OnlyDriver {
+    documentKeyTrees[d].addChild(nodeName);
   }
 
-  function setParentDocumentNode(bytes32 c, bytes12 d) OnlyDriver {
-    documentKeyTrees[c][d].upToParent();
+  function setParentDocumentNode(bytes12 d) OnlyDriver {
+    documentKeyTrees[d].upToParent();
   }
 
-  function setKeyIndex(bytes32 c, bytes12 d, bytes32 key, uint64 index) OnlyDriver {
-    documentKeyTrees[c][d].setKeyIndex(key, index);
-  }
-
+  function setKeyIndex(bytes12 d, bytes32 key, uint64 index) OnlyDriver {
+    documentKeyTrees[d].setKeyIndex(key, index);
   }
 
   ////////////////////////////////////////////
@@ -84,9 +82,9 @@ contract Database is DBAbstract {
     id = driver.getUniqueID(data);
     newDocument(collection, id, data);
 
-    documentKeyTrees[collection.toBytes32()][id] = DocumentKeyTree.newRoot();
+    documentKeyTrees[id] = DocumentKeyTree.newRoot();
 
-    driver.parseDocumentData(data, this, collection.toBytes32(), id);
+    driver.parseDocumentData(data, this, id);
   }
 
   /*function queryFind(string collection, byte[] query) constant {
