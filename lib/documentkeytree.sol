@@ -3,7 +3,6 @@ pragma solidity ^0.4.11;
 library DocumentKeyTree {
   struct DocumentKeyRoot {
     mapping (bytes32 => uint64)  keyIndex;
-    mapping (bytes32 => uint8)   keyType;
     mapping (bytes32 => DocumentKeyNode)  children;
     DocumentKeyNode currentNode;
     bool isCurrent;
@@ -11,7 +10,6 @@ library DocumentKeyTree {
 
   struct DocumentKeyNode {
     mapping (bytes32 => uint64)  keyIndex;
-    mapping (bytes32 => uint8)   keyType;
     mapping (bytes32 => DocumentKeyNode)  children;
     mapping (bool => DocumentKeyNode)  parent;
     bool isInit;
@@ -46,9 +44,5 @@ library DocumentKeyTree {
 
   function setKeyIndex(DocumentKeyRoot storage root, bytes32 k, uint64 i) internal {
     root.currentNode.keyIndex[k] = i;
-  }
-
-  function setKeyType(DocumentKeyRoot storage root, bytes32 k, uint8 t) internal {
-    root.currentNode.keyIndex[k] = t;
   }
 }

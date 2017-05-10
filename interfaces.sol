@@ -39,7 +39,6 @@ contract DBAbstract {
   function setParentDocumentNode(bytes32 c, bytes12 d);
 
   function setKeyIndex(bytes32 c, bytes12 d, bytes32 key, uint64 index);
-  function setKeyType(bytes32 c, bytes12 d, bytes32 key, uint8 _type);
 
   function queryInsert(string collection, byte[] data) returns (bytes12 id);
   //function queryFind(string collection, byte[] query) constant;

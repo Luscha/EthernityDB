@@ -74,8 +74,6 @@ contract Database is DBAbstract {
     documentKeyTrees[c][d].setKeyIndex(key, index);
   }
 
-  function setKeyType(bytes32 c, bytes12 d, bytes32 key, uint8 _type) OnlyDriver {
-    documentKeyTrees[c][d].setKeyType(key, _type);
   }
 
   ////////////////////////////////////////////

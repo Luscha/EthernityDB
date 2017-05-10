@@ -106,7 +106,6 @@ contract Driver is DriverAbstract {
             throw;
 
         db.setKeyIndex(c, d, b32Name, i + nDataStart);
-        db.setKeyType(c, d, b32Name, bType);
 
         if (bType == 0x03 || bType == 0x04) {
           if (documentIndex >= 7) throw;
