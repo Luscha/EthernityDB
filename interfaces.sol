@@ -6,14 +6,18 @@ contract DriverAbstract {
   function registerDatabase(address owner, string strName, DBAbstract db);
   function getDatabase(address owner, string strName) constant returns (DBAbstract);
 
-  function parseDocumentData(byte[] data, DBAbstract db, bytes12 d);
+  //function parseDocumentData(byte[] data) internal;
+  function checkDocumentValidity(byte[] data) internal constant returns (bool);
 
-  function getUniqueID(byte[] seed) constant returns (bytes12);
+  function processInsertion(byte[] query) returns (bytes12, bytes21);
+  function processQuery(byte[] query, DocumentAbstract doc);
+
+  function getUniqueID(byte[] seed) internal constant returns (bytes12);
+  function getDocumentHead(byte[] data) internal constant returns (bytes12, bytes21);
 }
 
 contract DBAbstract {
   struct Collection {
-    mapping (bytes12 => DocumentAbstract) documentByID;
     bytes12[] documentIDArray;
     string name;
     uint64 count;
@@ -21,6 +25,7 @@ contract DBAbstract {
   }
 
   mapping (bytes32 => Collection) public collectionsByName;
+  mapping (bytes12 => DocumentAbstract) public documentByID;
 
   DriverAbstract internal driver;
   address public owner;
@@ -32,21 +37,15 @@ contract DBAbstract {
 
   function newCollection(string strName);
   function getCollection(string strName) constant internal returns (Collection storage);
+  function getCollectionMetadata(string strName) constant returns (bytes32, uint64);
 
-  function newDocument(string collection, bytes12 _id, byte[] data) internal returns (DocumentAbstract d);
+  function getDocument(string collection, uint64 index) constant returns (bytes12);
 
-  function addEmbeededDocumentNode(bytes12 d, bytes32 nodeName);
-  function setParentDocumentNode(bytes12 d);
-
-  function setKeyIndex(bytes12 d, bytes32 key, uint64 index);
-
-  function queryInsert(string collection, byte[] data) returns (bytes12 id);
+  function queryInsert(string collection, byte[] data) returns (DocumentAbstract);
   //function queryFind(string collection, byte[] query) constant;
 }
 
 contract DocumentAbstract {
   byte[] internal data;
-  bytes12 public id;
-
   function getData() constant returns (byte[]);
 }

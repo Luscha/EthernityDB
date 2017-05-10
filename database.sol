@@ -1,14 +1,10 @@
 pragma solidity ^0.4.11;
-import "lib/documentkeytree.sol";
 import "lib/stringUtils.sol";
 import "interfaces.sol";
 import "document.sol";
 
 contract Database is DBAbstract {
   using StringUtils for string;
-  using DocumentKeyTree for DocumentKeyTree.DocumentKeyRoot;
-
-  mapping (bytes12 => DocumentKeyTree.DocumentKeyRoot)  documentKeyTrees;
 
   modifier OnlyDriver {
       if (msg.sender != address(driver)) throw;
@@ -49,42 +45,35 @@ contract Database is DBAbstract {
     return collectionsByName[strName.toBytes32()];
   }
 
+  function getCollectionMetadata(string strName) constant returns (bytes32 name, uint64 count) {
+    if (getCollection(strName).init == false) throw;
+    name = strName.toBytes32();
+    count = getCollection(strName).count;
+  }
+
   ////////////////////////////////////////////
   /// Document Related
-  function newDocument(string collection, bytes12 _id, byte[] data) internal returns (DocumentAbstract d) {
-    Collection c = getCollection(collection);
-    if (address(c.documentByID[_id]) != 0x0) throw;
-    if (true == isPrivate && msg.sender != owner) throw;
-
-    d = new Document(_id, data);
-    c.documentByID[_id] = d;
-    c.documentIDArray.push(_id);
-    c.count++;
-  }
-
-  function addEmbeededDocumentNode(bytes12 d, bytes32 nodeName) OnlyDriver {
-    documentKeyTrees[d].addChild(nodeName);
-  }
-
-  function setParentDocumentNode(bytes12 d) OnlyDriver {
-    documentKeyTrees[d].upToParent();
-  }
-
-  function setKeyIndex(bytes12 d, bytes32 key, uint64 index) OnlyDriver {
-    documentKeyTrees[d].setKeyIndex(key, index);
+  function getDocument(string collection, uint64 index) constant returns (bytes12 id) {
+    if (getCollection(collection).init == false) throw;
+    if (getCollection(collection).count <= index) throw;
+    id = getCollection(collection).documentIDArray[index];
   }
 
   ////////////////////////////////////////////
   /// Query Related
-  function queryInsert(string collection, byte[] data) returns (bytes12 id) {
+  function queryInsert(string collection, byte[] data) returns (DocumentAbstract d) {
+    if (true == isPrivate && msg.sender != owner) throw;
     if (getCollection(collection).init == false) throw;
 
-    id = driver.getUniqueID(data);
-    newDocument(collection, id, data);
+    bytes12 id;
+    bytes21 head;
+    (id, head) = driver.processInsertion(data);
+    if (address(documentByID[id]) != 0x0) throw;
 
-    documentKeyTrees[id] = DocumentKeyTree.newRoot();
-
-    driver.parseDocumentData(data, this, id);
+    d = new Document(data, head);
+    getCollection(collection).documentIDArray.push(id);
+    getCollection(collection).count++;
+    documentByID[id] = d;
   }
 
   /*function queryFind(string collection, byte[] query) constant {

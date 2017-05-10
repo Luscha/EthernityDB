@@ -61,12 +61,16 @@ document which contains the embeed document provided (not strictly equal):
     -> select("\n6F": [ { qty: 25 }, { size: { h: { "\n6D": 25 } } ])
 */
 import "lib/stringUtils.sol";
+import "lib/bytesUtils.sol";
 import "bsonparser/documentparser.sol";
 import "interfaces.sol";
 
 contract Driver is DriverAbstract {
   using StringUtils for string;
   using DocumentParser for byte[];
+  using BytesUtils for byte[];
+
+  bytes5 constant idKeyName = 0x075F696400;
 
   function registerDatabase(address owner, string strName, DBAbstract db) {
     if (address(getDatabase(owner, strName)) != 0x0) throw;
@@ -77,7 +81,7 @@ contract Driver is DriverAbstract {
     return databasesByName[owner][strName.toBytes32()];
   }
 
-  function parseDocumentData(byte[] data, DBAbstract db, bytes12 d) {
+  /*function parseDocumentData(byte[] data) internal {
     int8 documentIndex = -1;
     // For now we let only up to 8 nested document level
     uint64[] memory embeedDocumentStack = new uint64[](8);
@@ -116,9 +120,40 @@ contract Driver is DriverAbstract {
           i += nDataLen - 1;
         }
     }
+  }*/
+
+  function processInsertion(byte[] data) returns (bytes12 id, bytes21 head) {
+    if (false == checkDocumentValidity(data)) throw;
+    (id, head) = getDocumentHead(data);
   }
 
-  function getUniqueID(byte[] seed) constant returns (bytes12 id) {
+  function checkDocumentValidity(byte[] data) internal constant returns (bool) {
+    for (uint64 i = 4; i < data.length - 1; i++) {
+      uint8 bType = 0;
+      bytes32 b32Name = 0;
+      uint64 nDataLen = 0;
+      uint64 nDataStart = 0;
+      (bType, b32Name, nDataLen, nDataStart) = data.nextKeyValue(i);
+
+      if (bType == 0x0) {
+        continue;
+      }
+
+      // check type validity
+      if (bType > 0x12 || (bType >= 0x05  && bType <= 0x07) ||
+          bType == 0x09  || (bType >= 0x0B  && bType <= 0x0F))
+          return false;
+
+      if (bType == 0x03 || bType == 0x04) {
+        i += nDataStart - 1;
+      } else {
+        i += nDataLen - 1;
+      }
+    }
+    return true;
+  }
+
+  function getUniqueID(byte[] seed) internal constant returns (bytes12 id) {
     // 4 bit blockSha3
     // 3 bit hash(seed, msg.sender)
     // 2 bit timestamp
@@ -139,6 +174,20 @@ contract Driver is DriverAbstract {
         uint8 index = uint8(uint256(randomHash) % 32);
         id |= bytes12(randomHash[index]) >> (j * 8);
         randomHash = sha3(randomHash, seedSha3);
+      }
+    }
+  }
+
+  function getDocumentHead(byte[] data) internal constant returns (bytes12 id, bytes21 head){
+    id = getUniqueID(data);
+    bytes4 len = bytes4(int32(data.getLittleUint32Mem(0)) + 17);
+    for (uint8 i; i < 21; i++) {
+      if (i < 4) {
+        head |= bytes21(len[3 - i]) >> (i * 8);
+      } else if (i < 9) {
+        head |= bytes21(idKeyName[i - 4]) >> (i * 8);
+      } else {
+        head |= bytes21(id[i - 9]) >> (i * 8);
       }
     }
   }
