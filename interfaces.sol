@@ -7,13 +7,13 @@ contract DriverAbstract {
   function getDatabase(address owner, string strName) constant returns (DBAbstract);
 
   //function parseDocumentData(byte[] data) internal;
-  function checkDocumentValidity(byte[] data) internal constant returns (bool);
+  //function checkDocumentValidity(byte[] data) internal constant returns (bool);
 
   function processInsertion(byte[] query) returns (bytes12, bytes21);
   function processQuery(byte[] query, DocumentAbstract doc);
 
-  function getUniqueID(byte[] seed) internal constant returns (bytes12);
-  function getDocumentHead(byte[] data) internal constant returns (bytes12, bytes21);
+  //function getUniqueID(byte[] seed) internal constant returns (bytes12);
+  //function getDocumentHead(byte[] data) internal constant returns (bytes12, bytes21);
 }
 
 contract DBAbstract {
@@ -36,7 +36,7 @@ contract DBAbstract {
   function getDriver() constant returns (DriverAbstract);
 
   function newCollection(string strName);
-  function getCollection(string strName) constant internal returns (Collection storage);
+  //function getCollection(string strName) constant internal returns (Collection storage);
   function getCollectionMetadata(string strName) constant returns (bytes32, uint64);
 
   function getDocument(string collection, uint64 index) constant returns (bytes12);
