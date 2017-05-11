@@ -3,6 +3,12 @@ A NoSQL Document based DB implementation on top of the Ethereum Project blockcha
 
 The driver will use a subset of the BSON binary seralization to store and handle NoSQL documents in Json format.
 
+For the sake of simplicity
+--------------------------
+The NoSQL implementation accepts only documents with at most 8 level of embedded documents.
+The key must also be at most 30 character long.
+
+
 Reduced BSON grammar:
 -------------
 <pre><code>
@@ -25,42 +31,18 @@ string	::=	int32 (byte*) "\x00"	   String - The int32 is the number bytes in the
 cstring	::=	(byte*) "\x00"	         Zero or more modified UTF-8 encoded characters followed by '\x00'. The (byte*) MUST NOT contain '\x00', hence it is not full UTF-8.
 </code></pre>
 
-The driver will also use some reserved byte to identify logical operation over the SELECT closure.
+The driver will also use some reserved single-byte keys to identify logical operation over the SELECT closure.
 
-The AND operation is identified simply with a " , " that simply separates the keys of the closure (or the keys in a OR statement).
+The AND operation is identified simply with a " , " that separates the keys of the closure.
+In an OR operation the comma separates the single condition of the statement (one of them has to be true to satisfy the operation)
 
-
-<table>
-    <tr>
-        <td>x6F</td>
-        <td>OR</td>
-    </tr>
-    <tr>
-        <td>x6E</td>
-        <td>></td>
-    </tr>
-    <tr>
-        <td>x6D</td>
-        <td>>=</td>
-    </tr>
-    <tr>
-        <td>x6C</td>
-        <td><</td>
-    </tr>
-    <tr>
-        <td>x6B</td>
-        <td><=</td>
-    </tr>
-    <tr>
-        <td>x6A</td>
-        <td>!=</td>
-    </tr>
-</table>
-
-For the sake of simplicity
---------------------------
-The NoSQL implementation accepts only documents with at most 8 level of embedded documents.
-The key must also be at most 30 character long.
-
-
-The driver will also use some reserved byte to identify logical operation over the SELECT closure.
+| Key (HEX) | Operation | Required value format | Example |
+| --------- | --------- | --------------------- | ------- |
+| 0x2C | AND | Conditions separated by commas | key1: value1, key2: value2 |
+| 0x10 | OR | Array of conditions | '0x10': [key1: value1, key2: value2] |
+| 0x20 | > | Value of the comparison | key: {'0x20': value} |
+| 0x21 | >= | Value of the comparison | key: {'0x21': value} |
+| 0x22 | < | Value of the comparison | key: {'0x22': value} |
+| 0x23 | <= | Value of the comparison | key: {'0x23': value} |
+| 0x24 | != | Value of the comparison | key: {'0x24': value} |
+| 0x25 | == | Value of the comparison | key: {'0x25': value} or simply key: value |
