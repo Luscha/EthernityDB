@@ -1,57 +1,33 @@
 pragma solidity ^0.4.11;
 
 library BytesUtils {
-  function getUint32(byte[] storage self, uint64 fromIndex) constant returns (uint32 ret) {
+    function getUint32(byte[] self, uint64 fromIndex) constant returns (uint32 ret) {
     for (uint8 i = 0; i < 4; i++) {
         ret |= uint32(self[fromIndex + i]) << (8 * (3 - i));
     }
   }
 
-  function getUint64(byte[] storage self, uint64 fromIndex) constant returns (uint64 ret) {
-    for (uint8 i = 0; i < 8; i++) {
-        ret |= uint64(self[fromIndex + i]) << (8 * (7 - i));
-    }
-  }
-
-  function getUint32Mem(byte[] memory self, uint64 fromIndex) constant returns (uint32 ret) {
-    for (uint8 i = 0; i < 4; i++) {
-        ret |= uint32(self[fromIndex + i]) << (8 * (3 - i));
-    }
-  }
-
-  function getUint64Mem(byte[] memory self, uint64 fromIndex) constant returns (uint64 ret) {
+  function getUint64(byte[] self, uint64 fromIndex) constant returns (uint64 ret) {
     for (uint8 i = 0; i < 8; i++) {
         ret |= uint64(self[fromIndex + i]) << (8 * (7 - i));
     }
   }
 
   // Retreive Little Endian integers
-  function getLittleUint32(byte[] storage self, uint64 fromIndex) constant returns (uint32 ret) {
+    function getLittleUint32(byte[] self, uint64 fromIndex) constant returns (uint32 ret) {
     for (uint8 i = 0; i < 4; i++) {
         ret |= uint32(self[fromIndex + i]) << (8 * i);
     }
   }
 
-  function getLittleUint64(byte[] storage self, uint64 fromIndex) constant returns (uint64 ret) {
-    for (uint8 i = 0; i < 8; i++) {
-        ret |= uint64(self[fromIndex + i]) << (8 * i);
-    }
-  }
-
-  function getLittleUint32Mem(byte[] memory self, uint64 fromIndex) constant returns (uint32 ret) {
-    for (uint8 i = 0; i < 4; i++) {
-        ret |= uint32(self[fromIndex + i]) << (8 * i);
-    }
-  }
-
-  function getLittleUint64Mem(byte[] memory self, uint64 fromIndex) constant returns (uint64 ret) {
+  function getLittleUint64(byte[] self, uint64 fromIndex) constant returns (uint64 ret) {
     for (uint8 i = 0; i < 8; i++) {
         ret |= uint64(self[fromIndex + i]) << (8 * i);
     }
   }
 
   // Retreive String
-  function getStringAsBytes32Array(byte[] memory self, uint64 fromIndex) constant returns (bytes32[] ret, uint64 retLen) {
+  function getStringAsBytes32Array(byte[] self, uint64 fromIndex) constant returns (bytes32[] ret, uint64 retLen) {
     for (uint64 i = 0; self[i + fromIndex] != 0x0; i++) {
       retLen++;
     }
@@ -64,7 +40,7 @@ library BytesUtils {
     }
   }
 
-  function getStringAsBytes32Chopped(byte[] memory self, uint64 fromIndex) constant returns (bytes32 ret, uint64 retLen) {
+  function getStringAsBytes32Chopped(byte[] self, uint64 fromIndex) constant returns (bytes32 ret, uint64 retLen) {
     for (uint64 i = 0; self[i + fromIndex] != 0x0; i++) {
       retLen++;
     }

@@ -33,9 +33,9 @@ library DocumentParser {
     if (t == 0x01) {
       l = 8;
     } else if (t == 0x02) {
-      l = uint64(int32(d.getLittleUint32Mem(i + l))) + 4;
+      l = uint64(int32(d.getLittleUint32(i + l))) + 4;
     } else if (t == 0x03 || t == 0x04) {
-      l = uint64(int32(d.getLittleUint32Mem(i + l)));
+      l = uint64(int32(d.getLittleUint32(i + l)));
     } else if (t == 0x07) {
       l = 12;
     } else if (t == 0x08) {
