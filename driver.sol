@@ -159,7 +159,7 @@ contract Driver is DriverAbstract {
 
   function getDocumentHead(byte[] data) internal constant returns (bytes12 id, bytes21 head){
     id = getUniqueID(data);
-    bytes4 len = bytes4(int32(data.getLittleUint32Mem(0)) + 17);
+    bytes4 len = bytes4(int32(data.getLittleUint32(0)) + 17);
     for (uint8 i; i < 21; i++) {
       if (i < 4) {
         head |= bytes21(len[3 - i]) >> (i * 8);
