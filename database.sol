@@ -76,7 +76,15 @@ contract Database is DBAbstract {
     documentByID[id] = d;
   }
 
-  /*function queryFind(string collection, byte[] query) constant {
-    if (address(getCollection(collection)) == 0x0) throw;
-  }*/
+  function queryFind(string collection, uint64 index, byte[] query) constant returns (bytes12, uint64) {
+    Collection c = getCollection(collection);
+    if (c.init == false) throw;
+    for (index; index < c.count; index++) {
+      DocumentAbstract doc = documentByID[c.documentIDArray[index]];
+      if (true == driver.processQuery(query, doc)) {
+        return (c.documentIDArray[index], index);
+      }
+    }
+    return (bytes12(0), 0);
+  }
 }

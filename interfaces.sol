@@ -7,7 +7,6 @@ contract DriverAbstract {
   function getDatabase(address owner, string strName) constant returns (DBAbstract);
 
   function processInsertion(byte[] query) returns (bytes12, bytes21);
-  function processQuery(byte[] query, DocumentAbstract doc);
   function processQuery(byte[] query, DocumentAbstract doc) returns (bool);
 }
 
@@ -36,7 +35,7 @@ contract DBAbstract {
   function getDocument(string collection, uint64 index) constant returns (bytes12);
 
   function queryInsert(string collection, byte[] data) returns (DocumentAbstract);
-  //function queryFind(string collection, byte[] query) constant;
+  function queryFind(string collection, uint64 index, byte[] query) constant returns (bytes12, uint64);
 }
 
 contract DocumentAbstract {

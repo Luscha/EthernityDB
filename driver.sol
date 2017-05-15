@@ -30,6 +30,7 @@ document which contains the embeed document provided (not strictly equal):
 */
 import "lib/stringUtils.sol";
 import "lib/bytesUtils.sol";
+import "lib/documentkeytreeflat.sol";
 import "bsonparser/documentparser.sol";
 import "interfaces.sol";
 
@@ -37,6 +38,7 @@ contract Driver is DriverAbstract {
   using StringUtils for string;
   using DocumentParser for byte[];
   using BytesUtils for byte[];
+  using DocumentKeyTreeFlat for DocumentKeyTreeFlat.DocumentKeyRoot;
 
   bytes5 constant idKeyName = 0x075F696400;
 
@@ -49,15 +51,19 @@ contract Driver is DriverAbstract {
     return databasesByName[owner][strName.toBytes32()];
   }
 
-  /*function parseDocumentData(byte[] data) internal {
+  function parseDocumentData(DocumentAbstract doc, DocumentKeyTreeFlat.DocumentKeyRoot memory tree) internal {
+    byte[] memory data = new byte[](doc.length());
+    for (uint64 i = 0; i < doc.length(); i++) {
+      data[i] = doc.data(i);
+    }
     int8 documentIndex = -1;
     // For now we let only up to 8 nested document level
     uint64[] memory embeedDocumentStack = new uint64[](8);
     // Skip first 4 BYTE (int32 = Doc length)
-    for (uint64 i = 4; i < data.length - 1; i++) {
+    for (i = 4; i < data.length - 1; i++) {
         // Select parent nodeTree if available
         if (documentIndex >= 0 && embeedDocumentStack[uint8(documentIndex)] <= i) {
-          db.setParentDocumentNode(d);
+          tree.upToParent();
           documentIndex--;
         }
 
@@ -71,28 +77,27 @@ contract Driver is DriverAbstract {
           continue;
         }
 
-        // check type validity
-        if (bType > 0x12 || bType == 0x00 || bType == 0x05  || bType == 0x06 ||
-            bType == 0x09  || bType == 0x0B  || bType == 0x0C  || bType == 0x0D ||
-            bType == 0x0E  || bType == 0x0F)
-            throw;
-
-        db.setKeyIndex(d, b32Name, i + nDataStart);
+        tree.setKeyIndex(b32Name, uint32(i + nDataStart));
 
         if (bType == 0x03 || bType == 0x04) {
-          if (documentIndex >= 7) throw;
-          db.addEmbeededDocumentNode(d, b32Name);
+          if (documentIndex > 7) throw;
+          tree.addChild(b32Name);
           embeedDocumentStack[uint8(++documentIndex)] = i + nDataLen - 1;
           i += nDataStart - 1;
         } else {
           i += nDataLen - 1;
         }
     }
-  }*/
+  }
 
   function processInsertion(byte[] data) returns (bytes12 id, bytes21 head) {
     if (false == checkDocumentValidity(data)) throw;
     (id, head) = getDocumentHead(data);
+  }
+
+  function processQuery(byte[] query, DocumentAbstract doc) returns (bool ret) {
+    DocumentKeyTreeFlat.DocumentKeyRoot memory keyTreeRoot = DocumentKeyTreeFlat.newRoot();
+    parseDocumentData(doc, keyTreeRoot);
   }
 
   function checkDocumentValidity(byte[] data) internal constant returns (bool) {
