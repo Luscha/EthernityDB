@@ -138,9 +138,9 @@ contract Driver is DriverAbstract {
   }
 
   function getUniqueID(byte[] seed) internal constant returns (bytes12 id) {
-    // 4 bit blockSha3
-    // 3 bit hash(seed, msg.sender)
-    // 2 bit timestamp
+    // 4 bit timestamp
+    // 3 bit blockSha3
+    // 2 bit hash(seed, msg.sender)
     // 3 bit random
     bytes32 blockSha3 = sha3(block.blockhash(block.number - 1), msg.sender);
     bytes32 seedSha3 = sha3(seed, msg.sender);
@@ -149,11 +149,11 @@ contract Driver is DriverAbstract {
 
     for (uint8 j = 0; j < 12; j++) {
       if (j < 4) {
-        id |= bytes12(blockSha3[j]) >> (j * 8);
-      } else if (j < 7) {
-        id |= bytes12(seedSha3[j]) >> (j * 8);
-      } else if (j < 9) {
         id |= bytes12(timeSha3[j]) >> (j * 8);
+      } else if (j < 7) {
+        id |= bytes12(blockSha3[j]) >> (j * 8);
+      } else if (j < 9) {
+        id |= bytes12(seedSha3[j]) >> (j * 8);
       } else {
         uint8 index = uint8(uint256(randomHash) % 32);
         id |= bytes12(randomHash[index]) >> (j * 8);
