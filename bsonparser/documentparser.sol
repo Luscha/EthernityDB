@@ -5,14 +5,17 @@ library DocumentParser {
   using BytesUtils for byte[];
   using DocumentParser for byte[];
 
-  function nextKeyValue(byte[] memory d, uint64 i) constant internal returns (uint8 t, bytes32 n, uint64 l, uint64 s) {
+  function nextKeyValue(byte[] memory d, uint32 i) constant internal returns (uint8 t, bytes8 n, uint32 l, uint32 s) {
     t = d.getKeyValueType(i);
     if (t == 0x0) {
       return;
     }
 
-    (n, l) = d.getStringAsBytes32Chopped(i + 1);
-    n = getCombinedNameType(n, t);
+    bytes32 n32;
+    uint64 l64;
+    (n32, l64) = d.getStringAsBytes32Chopped(uint32(i + 1));
+    n = getCombinedNameType8(n32, t);
+    l = uint32(l64);
     // get the type byte too
     l += 1;
     s = l;
@@ -25,17 +28,17 @@ library DocumentParser {
     }
   }
 
-  function getKeyValueType(byte[] memory d, uint64 i) constant internal returns (uint8 t) {
+  function getKeyValueType(byte[] memory d, uint32 i) constant internal returns (uint8 t) {
     t = uint8(d[i]);
   }
 
-  function getKeyValueLength(byte[] memory d, uint64 i, uint8 t) constant internal returns (uint64 l) {
+  function getKeyValueLength(byte[] memory d, uint32 i, uint8 t) constant internal returns (uint32 l) {
     if (t == 0x01) {
       l = 8;
     } else if (t == 0x02) {
-      l = uint64(int32(d.getLittleUint32(i + l))) + 4;
+      l = uint32(int32(d.getLittleUint32(i + l))) + 4;
     } else if (t == 0x03 || t == 0x04) {
-      l = uint64(int32(d.getLittleUint32(i + l)));
+      l = uint32(int32(d.getLittleUint32(i + l)));
     } else if (t == 0x07) {
       l = 12;
     } else if (t == 0x08) {
@@ -47,10 +50,16 @@ library DocumentParser {
     }
   }
 
-  // This function combines the key name with his type so that later is possible to search for a 
+  // This function combines the key name with his type so that later is possible to search for a
   // particular key with a given type in a single lookup
   function getCombinedNameType(bytes32 n, uint8 t) constant private returns (bytes32 comb){
     comb = sha3(n, t);
-    comb = comb >> 8 | bytes32(t) << 26;
+    comb = comb >> 8 | bytes32(t) << (8 * 30);
+  }
+
+  // Like above but it returns only a 8 byte key
+  function getCombinedNameType8(bytes32 n, uint8 t) constant private returns (bytes8 comb){
+    comb = bytes8(sha3(n, t));
+    comb = comb >> 8 | bytes8(t) << 48;
   }
 }

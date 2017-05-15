@@ -7,6 +7,7 @@ For the sake of simplicity
 --------------------------
 The NoSQL implementation accepts only documents with at most 8 level of embedded documents.
 The key must also be at most 30 character long.
+The maximum length of a document is the unsigned 32 bit integer value - 21 (4.294.967.274) bytes.
 
 
 Reduced BSON grammar:

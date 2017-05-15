@@ -16,7 +16,7 @@ library DocumentKeyTreeFlat {
   }
 
   struct KeyIndexMap {
-    bytes32 key;
+    bytes8 key;
     uint32 value;
   }
 
@@ -29,7 +29,7 @@ library DocumentKeyTreeFlat {
 
   function resize(DocumentKeyRoot root) internal {
     if (root.last >= root.nodes.length -1) {
-      uint8 newLen = uint8(root.nodes.length) + 32;
+      uint8 newLen = uint8(root.nodes.length) + 16;
       DocumentKeyNode[] memory newNodes = new DocumentKeyNode[](newLen);
       for (uint8 i = 0; i < root.nodes.length; i++) {
           newNodes[i] = root.nodes[i];
@@ -42,7 +42,7 @@ library DocumentKeyTreeFlat {
     uint8 newLen = 0;
     uint8 i = 0;
     if (node.lastValue >= node.values.length -1) {
-      newLen = uint8(node.values.length) + 32;
+      newLen = uint8(node.values.length) + 16;
       KeyIndexMap[] memory newValues = new KeyIndexMap[](newLen);
       for (i = 0; i < node.values.length; i++) {
           newValues[i] = node.values[i];
@@ -50,7 +50,7 @@ library DocumentKeyTreeFlat {
       node.values = newValues;
     }
     if (node.lastChild >= node.children.length -1) {
-      newLen = uint8(node.children.length) + 32;
+      newLen = uint8(node.children.length) + 16;
       KeyIndexMap[] memory newChildren = new KeyIndexMap[](newLen);
       for (i = 0; i < node.children.length; i++) {
           newChildren[i] = node.values[i];
@@ -59,7 +59,7 @@ library DocumentKeyTreeFlat {
     }
   }
 
-  function addChild(DocumentKeyRoot root, bytes32 nodeName) internal {
+  function addChild(DocumentKeyRoot root, bytes8 nodeName) internal {
     resize(root);
     DocumentKeyNode memory node = root.nodes[++root.last];
     DocumentKeyNode memory current = root.nodes[root.current];
@@ -73,7 +73,7 @@ library DocumentKeyTreeFlat {
     root.current = root.nodes[root.current].parent;
   }
 
-  function setKeyIndex(DocumentKeyRoot root, bytes32 k, uint32 i) internal {
+  function setKeyIndex(DocumentKeyRoot root, bytes8 k, uint32 i) internal {
     DocumentKeyNode memory current = root.nodes[root.current];
     resize(current);
     current.values[current.lastValue++] = KeyIndexMap(k, i);
@@ -83,7 +83,7 @@ library DocumentKeyTreeFlat {
     root.current = 0;
   }
 
-  function selectKey(DocumentKeyRoot root, bytes32 k) internal returns (bool, uint32) {
+  function selectKey(DocumentKeyRoot root, bytes8 k) internal returns (bool, uint32) {
     DocumentKeyNode memory current = root.nodes[root.current];
     for (uint32 i = 0; i < current.lastValue; i++) {
       if (current.values[i].key == k) {
@@ -93,7 +93,7 @@ library DocumentKeyTreeFlat {
     return (false, 0);
   }
 
-  function selectChild(DocumentKeyRoot root, bytes32 k) internal returns (bool) {
+  function selectChild(DocumentKeyRoot root, bytes8 k) internal returns (bool) {
     DocumentKeyNode memory current = root.nodes[root.current];
     for (uint32 i = 0; i < current.lastChild; i++) {
       if (current.children[i].key == k) {

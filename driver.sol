@@ -53,12 +53,12 @@ contract Driver is DriverAbstract {
 
   function parseDocumentData(DocumentAbstract doc, DocumentKeyTreeFlat.DocumentKeyRoot memory tree) internal {
     byte[] memory data = new byte[](doc.length());
-    for (uint64 i = 0; i < doc.length(); i++) {
+    for (uint32 i = 0; i < doc.length(); i++) {
       data[i] = doc.data(i);
     }
     int8 documentIndex = -1;
     // For now we let only up to 8 nested document level
-    uint64[] memory embeedDocumentStack = new uint64[](8);
+    uint32[] memory embeedDocumentStack = new uint32[](8);
     // Skip first 4 BYTE (int32 = Doc length)
     for (i = 4; i < data.length - 1; i++) {
         // Select parent nodeTree if available
@@ -68,9 +68,9 @@ contract Driver is DriverAbstract {
         }
 
         uint8 bType = 0;
-        bytes32 b32Name = 0;
-        uint64 nDataLen = 0;
-        uint64 nDataStart = 0;
+        bytes8 b32Name = 0;
+        uint32 nDataLen = 0;
+        uint32 nDataStart = 0;
         (bType, b32Name, nDataLen, nDataStart) = data.nextKeyValue(i);
 
         if (bType == 0x0) {
@@ -103,16 +103,16 @@ contract Driver is DriverAbstract {
   function checkDocumentValidity(byte[] data) internal constant returns (bool) {
     int8 documentIndex = -1;
     // For now we let only up to 8 nested document level
-    uint64[] memory embeedDocumentStack = new uint64[](8);
-    for (uint64 i = 4; i < data.length - 1; i++) {
+    uint32[] memory embeedDocumentStack = new uint32[](8);
+    for (uint32 i = 4; i < data.length - 1; i++) {
       if (documentIndex >= 0 && embeedDocumentStack[uint8(documentIndex)] <= i) {
         documentIndex--;
       }
 
       uint8 bType = 0;
-      bytes32 b32Name = 0;
-      uint64 nDataLen = 0;
-      uint64 nDataStart = 0;
+      bytes8 b32Name = 0;
+      uint32 nDataLen = 0;
+      uint32 nDataStart = 0;
       (bType, b32Name, nDataLen, nDataStart) = data.nextKeyValue(i);
 
       if (bType == 0x0) {
