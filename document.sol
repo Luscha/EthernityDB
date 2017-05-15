@@ -14,6 +14,8 @@ contract Document is DocumentAbstract {
     for (i = 0; i < _data.length - 4; i++) {
         data.push(_data[i + 4]);
     }
+
+    length = uint64(data.length);
   }
 
   function getData() constant returns (byte[]) {

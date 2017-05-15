@@ -46,6 +46,7 @@ contract DBAbstract {
 }
 
 contract DocumentAbstract {
-  byte[] internal data;
+  byte[] public data;
+  uint64 public length;
   function getData() constant returns (byte[]);
 }
