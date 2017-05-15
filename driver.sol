@@ -96,7 +96,14 @@ contract Driver is DriverAbstract {
   }
 
   function checkDocumentValidity(byte[] data) internal constant returns (bool) {
+    int8 documentIndex = -1;
+    // For now we let only up to 8 nested document level
+    uint64[] memory embeedDocumentStack = new uint64[](8);
     for (uint64 i = 4; i < data.length - 1; i++) {
+      if (documentIndex >= 0 && embeedDocumentStack[uint8(documentIndex)] <= i) {
+        documentIndex--;
+      }
+
       uint8 bType = 0;
       bytes32 b32Name = 0;
       uint64 nDataLen = 0;
@@ -113,6 +120,10 @@ contract Driver is DriverAbstract {
           return false;
 
       if (bType == 0x03 || bType == 0x04) {
+        if (documentIndex > 7) {
+          return false;
+        }
+        embeedDocumentStack[uint8(++documentIndex)] = i + nDataLen - 1;
         i += nDataStart - 1;
       } else {
         i += nDataLen - 1;
