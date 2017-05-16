@@ -123,13 +123,11 @@ contract Driver is DriverAbstract {
     // 3 bit random
     bytes32 blockSha3 = sha3(block.blockhash(block.number - 1), msg.sender);
     bytes32 seedSha3 = sha3(seed, msg.sender);
-    bytes32 timeSha3 = sha3(block.timestamp, msg.sender);
-    bytes32 randomHash = sha3(sha3(blockSha3, timeSha3), seed);
+    bytes32 randomHash = sha3(blockSha3, seed);
 
-    for (uint8 j = 0; j < 12; j++) {
-      if (j < 4) {
-        id |= bytes12(timeSha3[j]) >> (j * 8);
-      } else if (j < 7) {
+    id |= bytes12(block.timestamp) << (8 * 8);
+    for (uint8 j = 4; j < 12; j++) {
+      if (j < 7) {
         id |= bytes12(blockSha3[j]) >> (j * 8);
       } else if (j < 9) {
         id |= bytes12(seedSha3[j]) >> (j * 8);
