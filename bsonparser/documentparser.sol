@@ -1,9 +1,11 @@
 pragma solidity ^0.4.11;
 import "../lib/bytesUtils.sol";
+import "../lib/treeflat.sol";
 
 library DocumentParser {
   using BytesUtils for byte[];
   using DocumentParser for byte[];
+  using TreeFlat for TreeFlat.TreeRoot;
 
   function nextKeyValue(byte[] memory d, uint32 i) constant internal returns (uint8 t, bytes8 n, uint32 l, uint32 s) {
     t = d.getKeyValueType(i);
@@ -50,6 +52,44 @@ library DocumentParser {
     }
   }
 
+  function getDocumentTree(byte[] memory data) constant internal returns (TreeFlat.TreeRoot tree) {
+    tree = TreeFlat.newRoot();
+    if (data.length < 4) {
+      return;
+    }
+    int8 documentIndex = -1;
+    // For now we let only up to 32 nested document level
+    uint32[] memory embeedDocumentStack = new uint32[](32);
+    // Skip first 4 BYTE (int32 = Doc length)
+    for (uint32 i = 4; i < data.length - 1; i++) {
+        // Select parent nodeTree if available
+        if (documentIndex >= 0 && embeedDocumentStack[uint8(documentIndex)] <= i) {
+          tree.upToParent();
+          documentIndex--;
+        }
+
+        uint8 bType = 0;
+        bytes8 b8Name = 0;
+        uint32 nDataLen = 0;
+        uint32 nDataStart = 0;
+        (bType, b8Name, nDataLen, nDataStart) = data.nextKeyValue(i);
+
+        if (bType == 0x0) {
+          continue;
+        }
+        if (bType == 0x03 || bType == 0x04) {
+          // For now we let only up to 32 nested document level
+          if (documentIndex > 31) throw;
+          tree.addChild(b8Name);
+          embeedDocumentStack[uint8(++documentIndex)] = i + nDataLen - 1;
+          i += nDataStart - 1;
+        } else {
+          tree.setKeyIndex(b8Name, uint32(i + nDataStart));
+          i += nDataLen - 1;
+        }
+    }
+  }
+
   // This function combines the key name with his type so that later is possible to search for a
   // particular key with a given type in a single lookup
   function getCombinedNameType(bytes32 n, uint8 t) constant private returns (bytes32 comb){
@@ -60,6 +100,6 @@ library DocumentParser {
   // Like above but it returns only a 8 byte key
   function getCombinedNameType8(bytes32 n, uint8 t) constant private returns (bytes8 comb){
     comb = bytes8(sha3(n, t));
-    comb = comb >> 8 | bytes8(t) << 48;
+    comb = (comb >> 8) | (bytes8(t) << 48);
   }
 }

@@ -1,37 +1,37 @@
 pragma solidity ^0.4.11;
 
-library DocumentKeyTree {
-  struct DocumentKeyRoot {
+library DocumentTree {
+  struct TreeRoot {
     mapping (bytes32 => uint64)  keyIndex;
-    mapping (bytes32 => DocumentKeyNode)  children;
-    DocumentKeyNode currentNode;
+    mapping (bytes32 => TreeNode)  children;
+    TreeNode currentNode;
     bool isCurrent;
   }
 
-  struct DocumentKeyNode {
+  struct TreeNode {
     mapping (bytes32 => uint64)  keyIndex;
-    mapping (bytes32 => DocumentKeyNode)  children;
-    mapping (bool => DocumentKeyNode)  parent;
+    mapping (bytes32 => TreeNode)  children;
+    mapping (bool => TreeNode)  parent;
     bool isInit;
   }
 
-  function newRoot() internal returns (DocumentKeyRoot memory root) {
-      root = DocumentKeyRoot({currentNode: DocumentKeyNode({isInit: false}), isCurrent: true});
+  function newRoot() internal returns (TreeRoot memory root) {
+      root = TreeRoot({currentNode: TreeNode({isInit: false}), isCurrent: true});
   }
 
-  function addChild(DocumentKeyRoot storage root, bytes32 nodeName) internal {
+  function addChild(TreeRoot storage root, bytes32 nodeName) internal {
     if (root.isCurrent == true) {
-        root.children[nodeName] = DocumentKeyNode({isInit: true});
+        root.children[nodeName] = TreeNode({isInit: true});
         root.isCurrent = false;
         root.currentNode.children[nodeName] = root.children[nodeName];
     } else {
-        root.currentNode.children[nodeName] = DocumentKeyNode({isInit: true});
+        root.currentNode.children[nodeName] = TreeNode({isInit: true});
         root.currentNode.children[nodeName].parent[true] = root.currentNode;
         root.currentNode = root.currentNode.children[nodeName];
     }
   }
 
-  function upToParent(DocumentKeyRoot storage root) internal {
+  function upToParent(TreeRoot storage root) internal {
     if (root.isCurrent == true) {
         return;
     } else if (root.currentNode.parent[true].isInit = false) {
@@ -41,7 +41,7 @@ library DocumentKeyTree {
     }
   }
 
-  function setKeyIndex(DocumentKeyRoot storage root, bytes32 k, uint64 i) internal {
+  function setKeyIndex(TreeRoot storage root, bytes32 k, uint64 i) internal {
     if (root.isCurrent == true) {
       root.keyIndex[k] = i;
     } else {
@@ -49,11 +49,11 @@ library DocumentKeyTree {
     }
   }
 
-  function selectRoot(DocumentKeyRoot storage root) internal {
+  function selectRoot(TreeRoot storage root) internal {
     root.isCurrent = true;
   }
 
-  function selectKey(DocumentKeyRoot storage root, bytes32 k) internal returns (bool, uint64) {
+  function selectKey(TreeRoot storage root, bytes32 k) internal returns (bool, uint64) {
     if (root.isCurrent == true) {
         if (root.keyIndex[k] == 0) {
           return (false, 0);
@@ -69,7 +69,7 @@ library DocumentKeyTree {
     }
   }
 
-  function selectChildren(DocumentKeyRoot storage root, bytes32 k) internal returns (bool) {
+  function selectChildren(TreeRoot storage root, bytes32 k) internal returns (bool) {
     if (root.isCurrent == true) {
         if (root.children[k].isInit == false) {
           return false;
