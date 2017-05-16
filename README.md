@@ -1,5 +1,5 @@
 # EternityDB
-A NoSQL Document based DB implementation on top of the Ethereum Project blockchain
+A NoSQL Document based DB implementation on top of the Ethereum Project blockchain.
 
 The driver will use a subset of the BSON binary seralization to store and handle NoSQL documents in Json format.
 
