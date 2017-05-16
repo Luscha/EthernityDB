@@ -30,7 +30,7 @@ document which contains the embeed document provided (not strictly equal):
 */
 import "lib/stringUtils.sol";
 import "lib/treeflat.sol";
-import "bsonparser/documentparser.sol";
+import "bson/documentparser.sol";
 import "interfaces.sol";
 
 contract Driver is DriverAbstract {

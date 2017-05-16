@@ -1,6 +1,6 @@
 pragma solidity ^0.4.11;
-import "../lib/bytesUtils.sol";
-import "../lib/treeflat.sol";
+import "lib/bytesUtils.sol";
+import "lib/treeflat.sol";
 
 library DocumentParser {
   using BytesUtils for byte[];
