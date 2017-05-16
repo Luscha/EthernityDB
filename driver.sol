@@ -96,8 +96,12 @@ contract Driver is DriverAbstract {
   }
 
   function checkDocumentValidity(byte[] data) internal constant returns (bool) {
-    TreeFlat.TreeRoot memory treeRoot = data.getDocumentTree();
+    // If the length is less or equal 5 the document is empty.
+    if (data.length <= 5) {
+      return false;
+    }
 
+    TreeFlat.TreeRoot memory treeRoot = data.getDocumentTree();
     // For now we let only up to 8 nested document level
     if (treeRoot.maxDeep > 8) {
       return false;
