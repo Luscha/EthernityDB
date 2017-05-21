@@ -66,27 +66,6 @@ contract Driver is DriverAbstract {
     return queryEngine.processQuery(query, data);
   }
 
-  function checkDocumentValidity(byte[] data) internal constant returns (bool) {
-    // If the length is less or equal 5 the document is empty.
-    if (data.length <= 5) {
-      return false;
-    }
-
-    /*TreeFlat.TreeRoot memory treeRoot = data.getDocumentTree();
-    // For now we let only up to 8 nested document level
-    if (treeRoot.maxDeep > 8) {
-      return false;
-    }*/
-
-    /*
-      // check type validity
-      if (bType > 0x12 || (bType >= 0x05  && bType <= 0x07) ||
-          bType == 0x09  || (bType >= 0x0B  && bType <= 0x0F))
-          return false;
-    }*/
-    return true;
-  }
-
   function getUniqueID(byte[] seed) internal constant returns (bytes12 id) {
     // 4 bit timestamp
     // 3 bit blockSha3
