@@ -29,7 +29,6 @@ document which contains the embeed document provided (not strictly equal):
     -> select("\n6F": [ { qty: 25 }, { size: { h: { "\n6D": 25 } } ])
 */
 import "lib/stringUtils.sol";
-import "lib/treeflat.sol";
 import "bson/documentparser.sol";
 import "interfaces.sol";
 
@@ -125,31 +124,22 @@ contract Driver is DriverAbstract {
     bytes32 seedSha3 = sha3(seed, msg.sender);
     bytes32 randomHash = sha3(blockSha3, seed);
 
-    id |= bytes12(block.timestamp) << (8 * 8);
-    for (uint8 j = 4; j < 12; j++) {
-      if (j < 7) {
-        id |= bytes12(blockSha3[j]) >> (j * 8);
-      } else if (j < 9) {
-        id |= bytes12(seedSha3[j]) >> (j * 8);
-      } else {
-        uint8 index = uint8(uint256(randomHash) % 32);
-        id |= bytes12(randomHash[index]) >> (j * 8);
-        randomHash = sha3(randomHash, seedSha3);
-      }
+    for (uint8 i = 0; i < 4; i++) {
+      id |= bytes4(bytes4(uint32(block.timestamp))[3 - i]) >> (i * 8);
     }
+    id |= bytes12(blockSha3) & 0x00000000FFFFFF0000000000;
+    id |= bytes12(seedSha3) & 0x00000000000000FFFF000000;
+    id |= bytes12(randomHash) & 0x000000000000000000FFFFFF;
   }
 
-  function getDocumentHead(byte[] data) internal constant returns (bytes12 id, bytes21 head) {
+  function getDocumentHead(byte[] data) constant returns (bytes12 id, bytes21 head) {
     id = getUniqueID(data);
     bytes4 len = bytes4(int32(data.getLittleUint32(0)) + 17);
-    for (uint8 i; i < 21; i++) {
-      if (i < 4) {
-        head |= bytes21(len[3 - i]) >> (i * 8);
-      } else if (i < 9) {
-        head |= bytes21(idKeyName[i - 4]) >> (i * 8);
-      } else {
-        head |= bytes21(id[i - 9]) >> (i * 8);
-      }
+
+    for (uint8 i = 0; i < 4; i++) {
+      head |= bytes4(bytes4(len)[3 - i]) >> (i * 8);
     }
+    head |= bytes21(idKeyName) >> (4 * 8);
+    head |= bytes21(id) >> (9 * 8);
   }
 }
