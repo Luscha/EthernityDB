@@ -208,8 +208,8 @@ function compileQueryEngine() {
 	compiledConstracts["queryengine"]["bytecode"] = output.contracts['queryengine.sol:QueryEngine'].bytecode;
 	compiledConstracts["queryengine"]["abi"] = JSON.parse(output.contracts['queryengine.sol:QueryEngine'].interface);
 	
-	deployLibrary(compiledConstracts["queryengine"]["bytecode"], output.contracts, deployQueryEngine);
 	console.log('    > Waiting for links');
+	deployLibrary(compiledConstracts["queryengine"]["bytecode"], output.contracts, deployQueryEngine);
 }
 
 function compileDriver() {
@@ -232,8 +232,8 @@ function compileDriver() {
 	compiledConstracts["driver"]["bytecode"] = output.contracts['driver.sol:Driver'].bytecode;
 	compiledConstracts["driver"]["abi"] = JSON.parse(output.contracts['driver.sol:Driver'].interface);
 	
-	deployLibrary(compiledConstracts["driver"]["bytecode"], output.contracts, deployDriver);
 	console.log('    > Waiting for links');
+	deployLibrary(compiledConstracts["driver"]["bytecode"], output.contracts, deployDriver);
 }
 
 function compileDB() {
@@ -256,8 +256,8 @@ function compileDB() {
 	compiledConstracts["database"]["bytecode"] = output.contracts['database.sol:Database'].bytecode;
 	compiledConstracts["database"]["abi"] = JSON.parse(output.contracts['database.sol:Database'].interface);
 	
-	deployLibrary(compiledConstracts["database"]["bytecode"], output.contracts, deployDB);
 	console.log('    > Waiting for links');
+	deployLibrary(compiledConstracts["database"]["bytecode"], output.contracts, deployDB);
 }
 
 function printTotalGas() {
