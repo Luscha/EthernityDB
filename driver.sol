@@ -53,12 +53,12 @@ contract Driver is DriverAbstract {
     return databasesByName[owner][strName.toBytes32()];
   }
 
-  function processInsertion(byte[] data) returns (bytes12 id, bytes21 head) {
-    if (false == checkDocumentValidity(data)) throw;
+  function processInsertion(byte[] data) constant returns (bytes12 id, bytes21 head) {
+    if (false == queryEngine.checkDocumentValidity(data, idKeyName)) throw;
     (id, head) = getDocumentHead(data);
   }
 
-  function processQuery(byte[] query, DocumentAbstract doc) returns (bool) {
+  function processQuery(byte[] query, DocumentAbstract doc) constant returns (bool) {
     byte[] memory data = new byte[](doc.length());
     for (uint32 i = 0; i < doc.length(); i++) {
       data[i] = doc.data(i);
