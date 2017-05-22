@@ -37,7 +37,8 @@ contract Driver is DriverAbstract {
   using StringUtils for string;
   using BytesUtils for byte[];
 
-  bytes5 constant idKeyName = 0x075F696400;
+  bytes5 constant idKeyNameEncoded = 0x075F696400;
+  bytes3 constant idKeyName = 0x5F6964;
   QueryEngine queryEngine;
 
   function Driver (QueryEngine qe) {
@@ -90,7 +91,7 @@ contract Driver is DriverAbstract {
     for (uint8 i = 0; i < 4; i++) {
       head |= bytes4(bytes4(len)[3 - i]) >> (i * 8);
     }
-    head |= bytes21(idKeyName) >> (4 * 8);
+    head |= bytes21(idKeyNameEncoded) >> (4 * 8);
     head |= bytes21(id) >> (9 * 8);
   }
 }
