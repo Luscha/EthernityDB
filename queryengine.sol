@@ -19,6 +19,8 @@ contract QueryEngine {
     TreeFlat.TreeIterator memory it = treeQuery.begin();
     TreeFlat.TreeNode memory n = it.tree.nodes[0];
 
+    byte op = eq;
+
     for (;; (n = it.next())) {
       if (n.deep != 0) {
         if (treeDoc.getCurrentDeep() >= treeQuery.getCurrentDeep()) {
@@ -35,7 +37,7 @@ contract QueryEngine {
         }
       }
       for (uint32 x = 0; x < n.lastValue; x++) {
-        if (false == checkValues(n.values[x], treeDoc, data, query))
+        if (false == checkValues(n.values[x], treeDoc, data, query, op))
           return;
       }
       if (false == it.hasNext()) {
@@ -80,7 +82,7 @@ contract QueryEngine {
     return true;
   }
 
-  function checkValues(TreeFlat.KeyIndexMap qki, TreeFlat.TreeRoot td, byte[] d, byte[] q) private constant returns (bool) {
+  function checkValues(TreeFlat.KeyIndexMap qki, TreeFlat.TreeRoot td, byte[] d, byte[] q, byte op) private constant returns (bool) {
     bool r;
     uint32 di;
     (r, di) = td.selectKey(qki.key);
@@ -90,7 +92,7 @@ contract QueryEngine {
     uint32 qi = qki.value;
     byte t;
     (t,) = DocumentParser.getTypeName8(qki.key);
-    return compareValues(t, di, d, qi, q, eq);
+    return compareValues(t, di, d, qi, q, op);
   }
 
   function compareValues(byte t, uint32 di, byte[] d, uint32 qi, byte[] q, byte op) private constant returns (bool) {
