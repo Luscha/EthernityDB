@@ -94,13 +94,23 @@ library DocumentParser {
   // This function combines the key name with his type so that later is possible to search for a
   // particular key with a given type in a single lookup
   function getCombinedNameType(bytes32 n, uint8 t) constant internal returns (bytes32 comb){
-    comb = sha3(n, t);
-    comb = comb >> 8 | bytes32(t) << (8 * 30);
+    comb = sha3(n);
+    comb = comb >> 8 | bytes32(t) << (8 * 31);
+  }
+
+  function getTypeName(bytes32 comb) constant internal returns (byte t, bytes31 k){
+    t = comb[0];
+    k = bytes31(comb << 8);
   }
 
   // Like above but it returns only a 8 byte key
   function getCombinedNameType8(bytes32 n, uint8 t) constant internal returns (bytes8 comb){
-    comb = bytes8(sha3(n, t));
-    comb = (comb >> 8) | (bytes8(t) << 48);
+    comb = bytes8(sha3(n));
+    comb = (comb >> 8) | (bytes8(t) << (8 * 7));
+  }
+
+  function getTypeName8(bytes8 comb) constant internal returns (byte t, bytes7 k){
+    t = comb[0];
+    k = bytes7(comb << 8);
   }
 }
