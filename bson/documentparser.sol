@@ -91,6 +91,12 @@ library DocumentParser {
     }
   }
 
+  function getObjectID(byte[] memory d, uint32 i) constant internal returns (bytes12 oid){
+    for (uint32 j = i; j < i + 12; j++) {
+      oid |= bytes12(d[j]) >> (8 * j);
+    }
+  }
+
   // This function combines the key name with his type so that later is possible to search for a
   // particular key with a given type in a single lookup
   function getCombinedNameType(bytes32 n, uint8 t) constant internal returns (bytes32 comb){
