@@ -27,6 +27,17 @@ library BytesUtils {
   }
 
   // Retreive String
+  function getString(byte[] self, uint64 fromIndex) constant internal returns (string) {
+    uint32 retLen = getLittleUint32(self, fromIndex);
+    bytes memory b = new bytes(retLen);
+
+    for (uint64 j = 0; j < retLen; j++) {
+      b[j] = self[fromIndex + j + 4];
+    }
+
+    return string(b);
+  }
+
   function getStringAsBytes32Array(byte[] self, uint64 fromIndex) constant returns (bytes32[] ret, uint64 retLen) {
     for (uint64 i = 0; self[i + fromIndex] != 0x0; i++) {
       retLen++;
