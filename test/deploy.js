@@ -1,6 +1,7 @@
 const fs = require('fs');
 const solc = require('solc');
 const Web3 = require('web3');
+const jsonfile = require('jsonfile')
 
 // Connect to local Ethereum node
 const web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
@@ -9,6 +10,7 @@ const fee = 100000;
 
 // Compiled Stuffs stuffs
 var compiledConstracts = {};
+var compiledLibraries = {};
 var gasSpent = 0;
 
 // Database creation param
@@ -60,48 +62,55 @@ function deployLibrary(bytecode, contracts, fallback) {
 		fallback(bytecode);
 		return;
 	}
-	
-	console.log('      ---> Deploying and linking library ' + libraryName);
-	
-	var bytecodeLib = contracts[libraryName].bytecode;
-	var abiLib = JSON.parse(contracts[libraryName].interface);
-	var lib = web3.eth.contract(abiLib);
-	
-	var estimate = web3.eth.estimateGas({data: '0x' + bytecodeLib})
-	console.log('      ---> Estimated gas to deploy ' + libraryName + ' = ' + estimate);
-	gasSpent += estimate + fee;
-	
-	// Deploy contract instance
-	var libInstance = lib.new({
-		data: '0x' + bytecodeLib,
-		from: web3.eth.coinbase,
-		gas: estimate + fee}, (err, res) => {
-		if (err) {
-			console.log(err);
-			return;
-		}
 
-		// If we have an address property, the contract was deployed
-		if (res.address) {
-			console.log('      ---> Linking ' + libraryName + ' at ' + res.address);
-			bytecode = linkLibrary(bytecode, libraryName, res.address);
-			deployLibrary(bytecode, contracts, fallback);
-		} else {
-			// Log the tx, you can explore status with eth.getTransaction()
-			console.log('      ---> Library transaction Hash ' + res.transactionHash);
-		}
-	});
+  if (!(libraryName in compiledLibraries)) {
+    console.log('      ---> Deploying and linking library ' + libraryName);
+
+  	var bytecodeLib = contracts[libraryName].bytecode;
+  	var abiLib = JSON.parse(contracts[libraryName].interface);
+  	var lib = web3.eth.contract(abiLib);
+
+  	var estimate = web3.eth.estimateGas({data: '0x' + bytecodeLib})
+  	console.log('      ---> Estimated gas to deploy ' + libraryName + ' = ' + estimate);
+  	gasSpent += estimate + fee;
+
+  	// Deploy contract instance
+  	var libInstance = lib.new({
+  		data: '0x' + bytecodeLib,
+  		from: web3.eth.coinbase,
+  		gas: estimate + fee}, (err, res) => {
+  		if (err) {
+  			console.log(err);
+  			return;
+  		}
+
+  		// If we have an address property, the contract was deployed
+  		if (res.address) {
+  			console.log('      ---> Linking ' + libraryName + ' at ' + res.address);
+  			bytecode = linkLibrary(bytecode, libraryName, res.address);
+        compiledLibraries[libraryName] = res.address;
+  			deployLibrary(bytecode, contracts, fallback);
+  		} else {
+  			// Log the tx, you can explore status with eth.getTransaction()
+  			console.log('      ---> Library transaction Hash ' + res.transactionHash);
+  		}
+  	});
+  } else {
+    console.log('      ---> Linking precompiled ' + libraryName + ' at ' + compiledLibraries[libraryName]);
+    bytecode = linkLibrary(bytecode, libraryName, compiledLibraries[libraryName]);
+    deployLibrary(bytecode, contracts, fallback);
+  }
 }
 
 function deployQueryEngine(bytecode) {
 	console.log('------------ Deploying Query Engine ------------');
 	var engine = web3.eth.contract(compiledConstracts["queryengine"]["abi"]);
 	compiledConstracts["queryengine"]["bytecode"] = bytecode;
-	
+
 	var estimate = web3.eth.estimateGas({data: '0x' + bytecode})
 	console.log('    > Estimated gas to deploy Query Engine = ' + estimate);
 	gasSpent += estimate + fee;
-	
+
 	var engineInstance = engine.new({
 		data: '0x' + bytecode,
 		from: web3.eth.coinbase,
@@ -110,7 +119,7 @@ function deployQueryEngine(bytecode) {
 			console.log(err);
 			return;
 		}
-		
+
 		if (res.address) {
 			console.log('    >>> Mined Driver Query Engine ' + res.address + ' <<<\n');
 			compiledConstracts["queryengine"]["address"] = res.address;
@@ -125,15 +134,15 @@ function deployDriver(bytecode) {
 	console.log('------------ Deploying Driver ------------');
 	var driver = web3.eth.contract(compiledConstracts["driver"]["abi"]);
 	compiledConstracts["driver"]["bytecode"] = bytecode;
-	
+
 	var driverBytecode = driver.new.getData(
 													compiledConstracts["queryengine"]["address"],
 													{data: '0x' + bytecode});
-	
+
 	var estimate = web3.eth.estimateGas({data: '0x' + bytecode})
 	console.log('    Estimated gas to deploy Driver = ' + estimate);
 	gasSpent += estimate + fee;
-	
+
 	var driverInstance = driver.new({
 		data: driverBytecode,
 		from: web3.eth.coinbase,
@@ -142,7 +151,7 @@ function deployDriver(bytecode) {
 			console.log(err);
 			return;
 		}
-		
+
 		if (res.address) {
 			console.log('    >>> Mined Driver at ' + res.address + ' <<<\n');
 			compiledConstracts["driver"]["address"] = res.address;
@@ -157,18 +166,16 @@ function deployDB(bytecode) {
 	console.log('------------ Deploying Database ------------');
 	var db = web3.eth.contract(compiledConstracts["database"]["abi"]);
 	compiledConstracts["database"]["bytecode"] = bytecode;
-	
-	var dbBytecode = db.new.getData(databaseConstructorParam["name"], 
+
+	var dbBytecode = db.new.getData(databaseConstructorParam["name"],
 													databaseConstructorParam["private"],
 													compiledConstracts["driver"]["address"],
 													{data: '0x' + bytecode});
-													
-	compiledConstracts["database"]["bytecodeWithParam"] = bytecode;
-													
+
 	var estimate = web3.eth.estimateGas({data: dbBytecode});
 	console.log('    Estimated gas to deploy Database = ' + estimate);
 	gasSpent += estimate + fee;
-	
+
 	var dbInstance = db.new({
 		data: dbBytecode,
 		from: web3.eth.coinbase,
@@ -177,11 +184,12 @@ function deployDB(bytecode) {
 			console.log(err);
 			return;
 		}
-		
+
 		if (res.address) {
 			console.log('    >>> Mined Database at ' + res.address + ' <<<\n');
 			compiledConstracts["database"]["address"] = res.address;
 			printTotalGas();
+      exportContractJSON();
 		} else {
 			console.log('    Database transaction Hash ' + res.transactionHash);
 		}
@@ -191,11 +199,11 @@ function deployDB(bytecode) {
 function compileQueryEngine() {
 	console.log('------------ Compiling Query Engine ------------');
 	var input = {
-		'queryengine.sol' : fs.readFileSync('./queryengine.sol').toString(),	
+		'queryengine.sol' : fs.readFileSync('./queryengine.sol').toString(),
 	}
-	
+
 	var output = solc.compile({sources : input}, 1, findImports);
-	
+
 	var hasErrors = false;
 	for (var error in output.errors) {
 		console.log(output.errors[error]);
@@ -207,7 +215,7 @@ function compileQueryEngine() {
 	compiledConstracts["queryengine"] = {};
 	compiledConstracts["queryengine"]["bytecode"] = output.contracts['queryengine.sol:QueryEngine'].bytecode;
 	compiledConstracts["queryengine"]["abi"] = JSON.parse(output.contracts['queryengine.sol:QueryEngine'].interface);
-	
+
 	console.log('    > Waiting for links');
 	deployLibrary(compiledConstracts["queryengine"]["bytecode"], output.contracts, deployQueryEngine);
 }
@@ -215,11 +223,11 @@ function compileQueryEngine() {
 function compileDriver() {
 	console.log('------------ Compiling Driver ------------');
 	var input = {
-		'driver.sol' : fs.readFileSync('./driver.sol').toString(),	
+		'driver.sol' : fs.readFileSync('./driver.sol').toString(),
 	}
-	
+
 	var output = solc.compile({sources : input}, 1, findImports);
-	
+
 	var hasErrors = false;
 	for (var error in output.errors) {
 		console.log(output.errors[error]);
@@ -231,7 +239,7 @@ function compileDriver() {
 	compiledConstracts["driver"] = {};
 	compiledConstracts["driver"]["bytecode"] = output.contracts['driver.sol:Driver'].bytecode;
 	compiledConstracts["driver"]["abi"] = JSON.parse(output.contracts['driver.sol:Driver'].interface);
-	
+
 	console.log('    > Waiting for links');
 	deployLibrary(compiledConstracts["driver"]["bytecode"], output.contracts, deployDriver);
 }
@@ -239,11 +247,11 @@ function compileDriver() {
 function compileDB() {
 	console.log('------------ Compiling Database ------------');
 	var input = {
-		'database.sol' : fs.readFileSync('./database.sol').toString(),	
+		'database.sol' : fs.readFileSync('./database.sol').toString(),
 	}
-	
+
 	var output = solc.compile({sources : input}, 1, findImports);
-	
+
 	var hasErrors = false;
 	for (var error in output.errors) {
 		console.log(output.errors[error]);
@@ -255,13 +263,20 @@ function compileDB() {
 	compiledConstracts["database"] = {};
 	compiledConstracts["database"]["bytecode"] = output.contracts['database.sol:Database'].bytecode;
 	compiledConstracts["database"]["abi"] = JSON.parse(output.contracts['database.sol:Database'].interface);
-	
+
 	console.log('    > Waiting for links');
 	deployLibrary(compiledConstracts["database"]["bytecode"], output.contracts, deployDB);
 }
 
 function printTotalGas() {
 	console.log('Total gas spent for the deploying:\n' + gasSpent.toLocaleString());
+}
+
+function exportContractJSON() {
+  var usefullInfos = {"database": {"abi": compiledConstracts["database"]["abi"],"address": compiledConstracts["database"]["address"]},
+                  "driver": {"abi": compiledConstracts["driver"]["abi"],"address": compiledConstracts["driver"]["address"]},
+                  "queryengine": {"abi": compiledConstracts["queryengine"]["abi"],"address": compiledConstracts["queryengine"]["address"]}}
+  jsonfile.writeFileSync("./test/contracts.json", usefullInfos, {spaces: 2})
 }
 
 unlockAccount();
