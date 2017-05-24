@@ -9,16 +9,12 @@ contract Document is DocumentAbstract {
   //  Where the 1s are the bytes where the key are
   function Document(byte[] _data, bytes21 head) {
     for (uint32 i = 0; i < 21; i++) {
-        data.push(head[i]);
+        data[i] = (head[i]);
     }
-    for (i = 0; i < _data.length - 4; i++) {
-        data.push(_data[i + 4]);
+    for (i = 4; i < _data.length; i++) {
+        data[i - 4 + 21] = _data[i];
     }
 
-    length = uint32(data.length);
-  }
-
-  function getData() constant returns (byte[]) {
-    return data;
+    length = uint32(_data.length) - 4 + 21;
   }
 }
