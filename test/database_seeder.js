@@ -55,7 +55,7 @@ function createNewCollection(db, collectionName) {
 function InsertTest(db, collectionName) {
 	console.log('------------ Insertion Test ------------');
 	var queries = [{"asd":2000,"foo":{"bar":19}},
-                //{"asd":2000,"foo":{"bar":19, "lol": "heheheheheh"}}
+                {"asd":2000,"foo":{"bar":19, "lol": "heheheheheh"}}
               ];
 
   queries.forEach((q, index) => {

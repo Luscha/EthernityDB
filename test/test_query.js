@@ -1,6 +1,7 @@
 const BSON = require('bson')
 const Web3 = require('web3');
 const jsonfile = require('jsonfile')
+const byteBuffer = require("bytebuffer");
 
 const bson = new BSON();
 const web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
@@ -28,6 +29,17 @@ function hexStringToHexArray(str) {
   return a;
 }
 
+function parseHexString(str) {
+    var result = [];
+    while (str.length >= 8) {
+        result.push(parseInt(str.substring(0, 8), 16));
+
+        str = str.substring(8, str.length);
+    }
+
+    return result;
+}
+
 function main() {
   var queries = [
     {"asd":2000},
@@ -36,6 +48,7 @@ function main() {
     {"foo":{"bar": 19}},
     {"asd":2000, "foo":{"a": 19}},
     {"asd":2000, "foo":{"lol": "h"}},
+    {"foo":{"lol": "heheheheheh"}},
     {},
     {"|": [{"asd": 2002}, {"asd": 2001}]},
     {"|": [{"asd": 2002}, {"asd": 2001}, {"asd": 2000}]},
@@ -50,10 +63,23 @@ function main() {
 	var dbInstance = buildDBContract(compiledConstracts["database"]);
   queries.forEach((q, index) => {
     var hexQ = hexStringToHexArray(bson.serialize(q).toString('hex'));
-    var ret = dbInstance.queryFind("a", 0, hexQ);
-    console.log("Query " + JSON.stringify(q));
     //console.log("Query " + hexStringToHexArray(bson.serialize(q).toString('hex')));
-    console.log(ret[0] + "\n");
+    console.log("Query " + JSON.stringify(q));
+    var i = 0;
+    var n = 0;
+    while (true) {
+      var ret = dbInstance.queryFind("a", i, hexQ);
+      i = parseInt(ret[1]) + 1;
+      if (i == 0) {
+        console.log("No more results\n");
+        break;
+      }
+
+      var buffer = byteBuffer.fromHex(String(ret[2]).substr(2))["buffer"];
+      console.log("Result n" + n + ": " + JSON.stringify(bson.deserialize(buffer)));
+      n++;
+    }
+
   })
 }
 

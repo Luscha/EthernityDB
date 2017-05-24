@@ -17,6 +17,7 @@
   "homepage": "https://github.com/Luscha/EternityDB#readme",
   "dependencies": {
     "bson": "^1.0.4",
+    "bytebuffer": "^5.0.1",
     "jsonfile": "^3.0.0",
     "solc": "^0.4.11",
     "web3": "^0.19.0"
