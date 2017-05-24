@@ -39,7 +39,7 @@ In an OR operation the comma separates the single condition of the statement (on
 | Key (HEX) | Operation | Required value format | Example |
 | --------- | --------- | --------------------- | ------- |
 | 0x2C | AND | Conditions separated by commas | key1: value1, key2: value2 |
-| 0x10 | OR | Array of conditions | '0x10': [key1: value1, key2: value2] |
+| 0x7c | OR | Array of conditions | '0x7c': [{key1: value1}, {key2: value2}] |
 | 0x20 | > | Value of the comparison | key: {'0x20': value} |
 | 0x21 | >= | Value of the comparison | key: {'0x21': value} |
 | 0x22 | < | Value of the comparison | key: {'0x22': value} |
