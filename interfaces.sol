@@ -19,15 +19,21 @@ contract DBAbstract {
   }
 
   mapping (bytes8 => Collection) public collectionsByName;
+  mapping (uint64 => bytes8) public collectionsIDByIndex;
   mapping (bytes12 => DocumentAbstract) public documentByID;
 
   DriverAbstract internal driver;
   address public owner;
   string public name;
+  uint64 public collectionCount;
   bool public isPrivate;
 
   function changeDriver(DriverAbstract newDriver);
   function getDriver() constant returns (DriverAbstract);
+
+  function migrateDatabase(DBAbstract to);
+  function receiveMigratingCollection(string name);
+  function receiveMigratingDocument(string collection, bytes12 id, DocumentAbstract doc);
 
   function newCollection(string strName);
   function getCollectionMetadata(string strName) constant returns (bytes32, uint64);

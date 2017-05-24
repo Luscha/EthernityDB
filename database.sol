@@ -32,6 +32,31 @@ contract Database is DBAbstract {
   }
 
   ////////////////////////////////////////////
+  /// Database Related
+  function migrateDatabase(DBAbstract to) {
+    if (tx.origin != owner) throw;
+    uint64 i = 0;
+    uint64 j = 0;
+    for (i = 0; i < collectionCount; i++) {
+      Collection c = collectionsByName[collectionsIDByIndex[i]];
+      to.receiveMigratingCollection(c.name);
+      for (j = 0; j < c.count; j++) {
+        to.receiveMigratingDocument(c.name, c.documentIDArray[j], documentByID[c.documentIDArray[j]]);
+      }
+    }
+  }
+
+  function receiveMigratingCollection(string name) {
+    if (tx.origin != owner) throw;
+    newCollection(name);
+  }
+
+  function receiveMigratingDocument(string collection, bytes12 id, DocumentAbstract doc) {
+    if (tx.origin != owner) throw;
+    insertDocument(collection, id, doc);
+  }
+
+  ////////////////////////////////////////////
   /// Collection Related
   function newCollection(string strName) {
     if (getCollection(strName).init != false) throw;
@@ -39,6 +64,7 @@ contract Database is DBAbstract {
 
     collectionsByName[bytes8(strName.toBytes32())].init = true;
     collectionsByName[bytes8(strName.toBytes32())].name = strName;
+    collectionsIDByIndex[collectionCount++] = bytes8(strName.toBytes32());
   }
 
   function getCollection(string strName) constant internal returns (Collection storage) {
@@ -49,6 +75,12 @@ contract Database is DBAbstract {
     if (getCollection(strName).init == false) throw;
     name = strName.toBytes32();
     count = getCollection(strName).count;
+  }
+
+  function insertDocument(string collection, bytes12 id, DocumentAbstract doc) private {
+    getCollection(collection).documentIDArray.push(id);
+    getCollection(collection).count++;
+    documentByID[id] = doc;
   }
 
   ////////////////////////////////////////////
@@ -71,9 +103,7 @@ contract Database is DBAbstract {
     if (address(documentByID[id]) != 0x0) throw;
 
     d = new Document(data, head);
-    getCollection(collection).documentIDArray.push(id);
-    getCollection(collection).count++;
-    documentByID[id] = d;
+    insertDocument(collection, id, d);
   }
 
   function queryFind(string collection, uint64 index, byte[] query) constant returns (bytes12, uint64) {
