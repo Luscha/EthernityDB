@@ -24,9 +24,9 @@ library DocumentParser {
     s = l;
 
     l += d.getKeyValueLength(i + l, t);
-    if (t == 0x02) {
+    /*if (t == 0x02) {
       s += 4;
-    } else if (t == 0x03 || t == 0x04) {
+    } else*/ if (t == 0x03 || t == 0x04) {
       s += 4;
     }
   }
