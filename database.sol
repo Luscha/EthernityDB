@@ -37,12 +37,12 @@ contract Database is DBAbstract {
     if (getCollection(strName).init != false) throw;
     if (true == isPrivate && msg.sender != owner) throw;
 
-    collectionsByName[strName.toBytes32()].init = true;
-    collectionsByName[strName.toBytes32()].name = strName;
+    collectionsByName[bytes8(strName.toBytes32())].init = true;
+    collectionsByName[bytes8(strName.toBytes32())].name = strName;
   }
 
   function getCollection(string strName) constant internal returns (Collection storage) {
-    return collectionsByName[strName.toBytes32()];
+    return collectionsByName[bytes8(strName.toBytes32())];
   }
 
   function getCollectionMetadata(string strName) constant returns (bytes32 name, uint64 count) {

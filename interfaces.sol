@@ -18,7 +18,7 @@ contract DBAbstract {
     bool init;
   }
 
-  mapping (bytes32 => Collection) public collectionsByName;
+  mapping (bytes8 => Collection) public collectionsByName;
   mapping (bytes12 => DocumentAbstract) public documentByID;
 
   DriverAbstract internal driver;
