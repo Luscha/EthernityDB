@@ -36,7 +36,7 @@ contract DBAbstract {
   function receiveMigratingDocument(string collection, bytes12 id, DocumentAbstract doc);
 
   function newCollection(string strName);
-  function getCollectionMetadata(string strName) constant returns (bytes32, uint64);
+  function getCollectionMetadata(string strName) constant returns (bytes8, uint64);
 
   function getDocument(string collection, uint64 index) constant returns (bytes12, bytes);
 

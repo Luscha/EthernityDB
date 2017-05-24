@@ -71,9 +71,9 @@ contract Database is DBAbstract {
     return collectionsByName[bytes8(strName.toBytes32())];
   }
 
-  function getCollectionMetadata(string strName) constant returns (bytes32 name, uint64 count) {
+  function getCollectionMetadata(string strName) constant returns (bytes8 name, uint64 count) {
     if (getCollection(strName).init == false) throw;
-    name = strName.toBytes32();
+    name = bytes8(strName.toBytes32());
     count = getCollection(strName).count;
   }
 
