@@ -14,7 +14,7 @@ library BytesUtils {
   }
 
   // Retreive Little Endian integers
-    function getLittleUint32(byte[] self, uint64 fromIndex) constant returns (uint32 ret) {
+  function getLittleUint32(byte[] self, uint64 fromIndex) constant returns (uint32 ret) {
     for (uint8 i = 0; i < 4; i++) {
         ret |= uint32(self[fromIndex + i]) << (8 * i);
     }
