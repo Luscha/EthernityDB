@@ -13,38 +13,86 @@ contract QueryEngine {
   byte constant eq = 0x25;
 
   function processQuery(byte[] query, byte[] data) constant returns (bool) {
+  //function processQuery(byte[] query, byte[] data) constant returns (bool) {
     TreeFlat.TreeRoot memory treeDoc = data.getDocumentTree();
-    TreeFlat.TreeRoot memory treeQuery = query.getDocumentTree();
-    treeDoc.selectRoot();
-    TreeFlat.TreeIterator memory it = treeQuery.begin();
+    treeDoc = treeDoc.selectRoot();
+    TreeFlat.TreeIterator memory it = query.getDocumentTree().begin();
     TreeFlat.TreeNode memory n = it.tree.nodes[0];
 
+    uint32 i = 0;
     byte op = eq;
 
-    for (;; (n = it.next())) {
-      if (n.deep != 0) {
-        if (treeDoc.getCurrentDeep() >= treeQuery.getCurrentDeep()) {
-          for (uint32 j = treeDoc.getCurrentDeep(); j >= treeQuery.getCurrentDeep(); j--) {
-            treeDoc.upToParent();
+    uint32 orDepth = 0;
+    bool success = true;
+
+    for (; n.depth != it.end().depth; ((it, n) = it.next())) {
+      // ///////////////////////////
+      // //// OR CLAUSE AMANGEMENT
+      if (orDepth != 0 && success == true &&
+        (orDepth & 0x0F000000) == 0x0F000000 && (orDepth & 0x000FFFFF) == n.depth) { // OR satisfied, reset orDepth
+        orDepth = 0;
+      }
+
+      if (orDepth != 0) {
+        if ((success == true && (orDepth & 0x0F000000) == 0x0F000000 && n.depth > (orDepth & 0x000FFFFF)) || // condition satisfied, cotinue till root of the OR
+          (success == false && n.depth > (orDepth & 0x000FFFFF) + 1)) {// condition failed, cotinue till root of the OR
+            continue;
+        }
+
+        if (success == false && (orDepth & 0x000FFFFF) == n.depth) {
+          return false;
+        } // OR failed, return false
+
+        if (success == true && (orDepth & 0x000FFFFF) + 1 == n.depth) {
+          if ((orDepth & 0x00F00000) == 0x00F00000) { // if oDepth & 15728640 it means we are at least in the second condition
+            orDepth |= 0x0F000000;
+            continue;
+          } else {
+            orDepth |= 0x00F00000;
           }
-          if (false == treeDoc.selectChild(n.name)) {
+        }
+
+        if (success == false && (orDepth & 0x000FFFFF) + 1 == n.depth) { // after the failed clause, restore the orDepth
+          success = true;
+        }
+      }
+
+      if (n.name == DocumentParser.getCombinedNameType8(or, 0x04)) {
+        orDepth = n.depth;
+        continue;
+      }
+      // //// OR CLAUSE AMANGEMENT
+      // ///////////////////////////
+      if (n.depth != 0) {
+        if (orDepth == 0) {
+          for (i = treeDoc.getCurrentDepth(); i >= n.depth; i--) {
+            treeDoc = treeDoc.upToParent();
+          }
+          (success, treeDoc) = treeDoc.selectChild(n.name);
+          if (false == success) {
             return false;
           }
         } else {
-          if (false == treeDoc.selectChild(n.name)) {
-            return false;
+          for (i = treeDoc.getCurrentDepth(); i > n.depth - 2; i--) {
+            treeDoc = treeDoc.upToParent();
+          }
+          if (n.depth > (orDepth & 0x000FFFFF) + 1) {
+            (success, treeDoc) = treeDoc.selectChild(n.name);
+            if (false == success) {
+              continue;
+            }
           }
         }
       }
-      for (uint32 x = 0; x < n.lastValue; x++) {
-        if (false == checkValues(n.values[x], treeDoc, data, query, op))
-          return;
-      }
-      if (false == it.hasNext()) {
-        break;
+
+      for (i = 0; i < n.lastValue && true == success; i++) {
+        success = checkValues(n.values[i], treeDoc, data, query, op);
+        if (false == success && orDepth == 0) {
+          return false;
+        }
       }
     }
-    return true;
+    return success;
   }
 
   function checkDocumentValidity(byte[] data, bytes3 idName) constant returns (bool) {
@@ -55,28 +103,27 @@ contract QueryEngine {
     bytes7 idName7 = bytes7(sha3(bytes32(idName)));
     TreeFlat.TreeRoot memory treeDocument = data.getDocumentTree();
     // For now we let only up to 8 nested document level
-    if (treeDocument.maxDeep > 8) {
+    if (treeDocument.maxDepth > 8) {
       return false;
     }
 
     TreeFlat.TreeIterator memory it = treeDocument.begin();
     TreeFlat.TreeNode memory n = it.tree.nodes[0];
 
-    for (;; (n = it.next())) {
-      for (uint32 x = 0; x < n.lastValue; x++) {
-        bytes7 name7;
-        byte bType;
+    uint32 x = 0;
+    bytes7 name7;
+    byte bType;
+
+    for (; n.depth != it.end().depth; ((it, n) = it.next())) {
+      for (x = 0; x < n.lastValue; x++) {
         (bType, name7) = DocumentParser.getTypeName8(n.values[x].key);
         // check type validity
         if (bType == 0x01 ||  bType > 0x12 || (bType >= 0x05  && bType <= 0x07) ||
             bType == 0x09  || (bType >= 0x0B  && bType <= 0x0F))
             return false;
         // chack idName
-        if (n.deep == 0 && idName7 == name7)
+        if (n.depth == 0 && idName7 == name7)
           return false;
-      }
-      if (false == it.hasNext()) {
-        break;
       }
     }
     return true;
@@ -113,6 +160,7 @@ contract QueryEngine {
     } else if (t == 0x12) { // 64-bit integer
       return compareint64(di, d, qi, q, op);
     }
+    return false;
   }
 
   function compareStrings(uint32 di, byte[] d, uint32 qi, byte[] q, byte op) constant internal returns (bool) {
@@ -121,6 +169,7 @@ contract QueryEngine {
     if (op == eq) { // dummy check, for now we use only equality
       return sha3(ds) == sha3(qs);
     }
+    return false;
   }
 
   function compareObjectID(uint32 di, byte[] d, uint32 qi, byte[] q, byte op) constant internal returns (bool) {
@@ -129,6 +178,7 @@ contract QueryEngine {
     if (op == eq) { // dummy check, for now we use only equality
       return doid == qoid;
     }
+    return false;
   }
 
   function compareint32(uint32 di, byte[] d, uint32 qi, byte[] q, byte op) constant internal returns (bool) {
@@ -137,6 +187,7 @@ contract QueryEngine {
     if (op == eq) { // dummy check, for now we use only equality
       return dint32 == qint32;
     }
+    return false;
   }
 
   function compareint64(uint32 di, byte[] d, uint32 qi, byte[] q, byte op) constant internal returns (bool) {
@@ -145,6 +196,7 @@ contract QueryEngine {
     if (op == eq) { // dummy check, for now we use only equality
       return dint64 == qint64;
     }
+    return false;
   }
 
   function compareuint64(uint32 di, byte[] d, uint32 qi, byte[] q, byte op) constant internal returns (bool) {
@@ -153,5 +205,6 @@ contract QueryEngine {
     if (op == eq) { // dummy check, for now we use only equality
       return duint64 == quint64;
     }
+    return false;
   }
 }

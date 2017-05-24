@@ -65,7 +65,7 @@ library DocumentParser {
     for (uint32 i = 4; i < data.length - 1; i++) {
         // Select parent nodeTree if available
         if (documentIndex >= 0 && embeedDocumentStack[uint8(documentIndex)] <= i) {
-          tree.upToParent();
+          tree = tree.upToParent();
           documentIndex--;
         }
 
@@ -81,11 +81,11 @@ library DocumentParser {
         if (bType == 0x03 || bType == 0x04) {
           // For now we let only up to 32 nested document level
           if (documentIndex > 31) throw;
-          tree.addChild(b8Name);
+          tree = tree.addChild(b8Name);
           embeedDocumentStack[uint8(++documentIndex)] = i + nDataLen - 1;
           i += nDataStart - 1;
         } else {
-          tree.setKeyIndex(b8Name, uint32(i + nDataStart));
+          tree = tree.setKeyIndex(b8Name, uint32(i + nDataStart));
           i += nDataLen - 1;
         }
     }

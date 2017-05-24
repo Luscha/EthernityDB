@@ -5,7 +5,7 @@ library TreeFlat {
     TreeNode[] nodes;
     uint32 current;
     uint32 last;
-    uint8 maxDeep;
+    uint8 maxDepth;
   }
 
   struct TreeNode {
@@ -15,7 +15,7 @@ library TreeFlat {
     uint32 lastValue;
     uint32 lastChild;
     uint32 parent;
-    uint8 deep;
+    uint8 depth;
   }
 
   struct KeyIndexMap {
@@ -34,7 +34,7 @@ library TreeFlat {
         nodes: new TreeNode[](16),
         current: 0,
         last: 0,
-        maxDeep: 0});
+        maxDepth: 0});
     root.nodes[0] = newNode(0, 0, bytes8(0));
   }
 
@@ -46,10 +46,10 @@ library TreeFlat {
         lastValue: 0,
         lastChild: 0,
         parent: p,
-        deep: d});
+        depth: d});
   }
 
-  function resize(TreeRoot root) internal {
+  function resize(TreeRoot root) internal returns (TreeRoot) {
     if (root.last >= root.nodes.length -1) {
       uint8 newLen = uint8(root.nodes.length) + 16;
       TreeNode[] memory newNodes = new TreeNode[](newLen);
@@ -58,9 +58,10 @@ library TreeFlat {
       }
       root.nodes = newNodes;
     }
+    return root;
   }
 
-  function resize(TreeNode node) internal {
+  function resize(TreeNode node) internal returns (TreeNode) {
     uint8 newLen = 0;
     uint8 i = 0;
     if (node.lastValue >= node.values.length -1) {
@@ -79,40 +80,45 @@ library TreeFlat {
       }
       node.children = newChildren;
     }
+    return node;
   }
 
-  function addChild(TreeRoot root, bytes8 nodeName) internal {
-    resize(root);
+  function addChild(TreeRoot root, bytes8 nodeName) internal returns (TreeRoot) {
+    root = resize(root);
     root.last++;
     TreeNode memory current = root.nodes[root.current];
-    resize(current);
+    current = resize(current);
     current.children[current.lastChild++] = KeyIndexMap(nodeName, root.last);
-    TreeNode memory node = newNode(root.current, current.deep + 1, nodeName);
+    TreeNode memory node = newNode(root.current, current.depth + 1, nodeName);
     root.nodes[root.current] = current;
     root.nodes[root.last] = node;
     root.current = root.last;
-    if (root.maxDeep < node.deep) {
-      root.maxDeep = node.deep;
+    if (root.maxDepth < node.depth) {
+      root.maxDepth = node.depth;
     }
+    return root;
   }
 
-  function upToParent(TreeRoot root) internal {
+  function upToParent(TreeRoot root) internal returns (TreeRoot) {
     root.current = root.nodes[root.current].parent;
+    return root;
   }
 
-  function setKeyIndex(TreeRoot root, bytes8 k, uint32 i) internal {
+  function setKeyIndex(TreeRoot root, bytes8 k, uint32 i) internal returns (TreeRoot) {
     TreeNode memory current = root.nodes[root.current];
-    resize(current);
+    current = resize(current);
     current.values[current.lastValue++] = KeyIndexMap(k, i);
     root.nodes[root.current] = current;
+    return root;
   }
 
-  function selectRoot(TreeRoot root) internal {
+  function selectRoot(TreeRoot root) internal returns (TreeRoot) {
     root.current = 0;
+    return root;
   }
 
-  function getCurrentDeep(TreeRoot root) internal returns (uint32){
-    return root.nodes[root.current].deep;
+  function getCurrentDepth(TreeRoot root) internal returns (uint32){
+    return root.nodes[root.current].depth;
   }
 
   function selectKey(TreeRoot root, bytes8 k) internal returns (bool, uint32) {
@@ -125,46 +131,49 @@ library TreeFlat {
     return (false, 0);
   }
 
-  function selectChild(TreeRoot root, bytes8 k) internal returns (bool) {
+  function selectChild(TreeRoot root, bytes8 k) internal returns (bool, TreeRoot) {
     TreeNode memory current = root.nodes[root.current];
     for (uint32 i = 0; i < current.lastChild; i++) {
       if (current.children[i].key == k) {
         root.current = current.children[i].value;
-        return true;
+        return(true, root);
       }
     }
-    return false;
+    return (false, root);
   }
 
   function begin(TreeRoot root) internal returns (TreeIterator memory it) {
     it = TreeIterator({
       tree: root,
-      trace: new uint32[](root.last + 1),
-      goal: new uint32[](root.last + 1)});
+      trace: new uint32[](root.last + 2),
+      goal: new uint32[](root.last + 2)});
+
+    it.tree = selectRoot(it.tree);
+    it.tree = addChild(it.tree, 0);
+    it.tree.nodes[it.tree.last].depth = 0xF;
+
     for (uint32 i = 0; i <= root.last; i++) {
       it.goal[i] = root.nodes[i].lastChild;
     }
-    selectRoot(it.tree);
+    it.tree = selectRoot(it.tree);
   }
 
-  function hasNext(TreeIterator it) internal returns (bool) {
-    for (uint32 i = 0; i < it.trace.length; i++) {
-      if (it.trace[i] != it.goal[i]) {
-        return true;
-      }
-    }
-    return false;
+  function end(TreeIterator it) internal returns (TreeNode memory) {
+    return it.tree.nodes[it.tree.last];
   }
 
-  function next(TreeIterator it) internal returns (TreeNode memory ret) {
+  function next(TreeIterator it) internal returns (TreeIterator, TreeNode) {
     uint32 c = it.tree.current;
+    if (c == 0 && it.trace[0] >= it.goal[0]) {
+      return (it, end(it));
+    }
     if (it.trace[c] >= it.goal[c]) {
-      upToParent(it.tree);
+      it.tree = upToParent(it.tree);
       return next(it);
     } else {
       TreeNode memory n = it.tree.nodes[c];
-      selectChild(it.tree, n.children[it.trace[c]++].key);
-      ret = it.tree.nodes[it.tree.current];
+      (,it.tree) = selectChild(it.tree, n.children[it.trace[c]++].key);
+      return (it, it.tree.nodes[it.tree.current]);
     }
   }
 }
