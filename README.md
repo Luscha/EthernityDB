@@ -16,8 +16,7 @@ Reduced BSON grammar:
 document	::=	int32 e_list "\x00"	BSON Document. int32 is the total number of bytes comprising the document.
 e_list	::=	element e_list
   |	""
-element	::=	"\x01" e_name double	 64-bit binary floating point
-  |	"\x02" e_name string	         UTF-8 string
+element	::=	"\x02" e_name string	         UTF-8 string
   |	"\x03" e_name document	       Embedded document
   |	"\x04" e_name document	       Array
   |	"\x07" e_name (byte*12)	       ObjectId
