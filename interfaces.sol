@@ -38,10 +38,10 @@ contract DBAbstract {
   function newCollection(string strName);
   function getCollectionMetadata(string strName) constant returns (bytes32, uint64);
 
-  function getDocument(string collection, uint64 index) constant returns (bytes12);
+  function getDocument(string collection, uint64 index) constant returns (bytes12, bytes);
 
   function queryInsert(string collection, byte[] data) returns (DocumentAbstract);
-  function queryFind(string collection, uint64 index, byte[] query) constant returns (bytes12, uint64);
+  function queryFind(string collection, uint64 index, byte[] query) constant returns (bytes12, int64, bytes);
 }
 
 contract DocumentAbstract {

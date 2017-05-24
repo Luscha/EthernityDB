@@ -85,10 +85,16 @@ contract Database is DBAbstract {
 
   ////////////////////////////////////////////
   /// Document Related
-  function getDocument(string collection, uint64 index) constant returns (bytes12 id) {
+  function getDocument(string collection, uint64 index) constant returns (bytes12, bytes) {
     if (getCollection(collection).init == false) throw;
     if (getCollection(collection).count <= index) throw;
-    id = getCollection(collection).documentIDArray[index];
+    bytes12 id = getCollection(collection).documentIDArray[index];
+    DocumentAbstract doc = documentByID[id];
+    bytes memory data = new bytes(doc.length());
+    for (uint32 i = 0; i < doc.length(); i++) {
+      data[i] = doc.data(i);
+    }
+    return (id, data);
   }
 
   ////////////////////////////////////////////
@@ -106,15 +112,20 @@ contract Database is DBAbstract {
     insertDocument(collection, id, d);
   }
 
-  function queryFind(string collection, uint64 index, byte[] query) constant returns (bytes12, uint64) {
+  function queryFind(string collection, uint64 index, byte[] query) constant returns (bytes12, int64, bytes) {
     Collection c = getCollection(collection);
+    DocumentAbstract doc;
     if (c.init == false) throw;
     for (index; index < c.count; index++) {
-      DocumentAbstract doc = documentByID[c.documentIDArray[index]];
+      doc = documentByID[c.documentIDArray[index]];
       if (true == driver.processQuery(query, doc)) {
-        return (c.documentIDArray[index], index);
+        bytes memory data = new bytes(doc.length());
+        for (uint32 i = 0; i < doc.length(); i++) {
+          data[i] = doc.data(i);
+        }
+        return (c.documentIDArray[index], int64(index), data);
       }
     }
-    return (bytes12(0), 0);
+    return (bytes12(0), -1, new bytes(0));
   }
 }
