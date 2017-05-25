@@ -115,7 +115,7 @@ var bsonQuery = bson.serialize(query);
 var hexQuery = bsonQuery.toString('hex');
   // 3f368a....
 
-var hexArrayQuery = ... // Split the hexQuery in an array of bytes12
+var hexArrayQuery = ... // Split the hexQuery in an array of bytes
   // ["0x3f", "036", "0x8a"]
 
 var collectionName = // Name of the collection where the document has to be stored
@@ -146,14 +146,14 @@ var db = web3.eth.contract(dbABI);
 var dbInstance db.at(dbAddress);
 
 var query = {"asd": 2000};
-var queryWithOr = {"|" [{"asd": 2000}, {"foo": {"bar" : 19}}]};
+var queryWithOr = {"|": [{"asd": 2000}, {"foo": {"bar" : 19}}]};
 
 var bsonQuery = bson.serialize(query); // same for the queryWithOr
   // some bytestring
 var hexQuery = bsonQuery.toString('hex');
   // 3f368a....
 
-var hexArrayQuery = ... // Split the hexQuery in an array of bytes12
+var hexArrayQuery = ... // Split the hexQuery in an array of bytes
   // ["0x3f", "036", "0x8a"]
 
 var collectionName = // Name of the collection to query
