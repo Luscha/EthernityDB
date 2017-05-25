@@ -1,4 +1,7 @@
 # EternityDB
+![Ethereum Project](https://chocolatey.org/content/packageimages/AlethZero-Latest.0.8.2.54-latest.png)
+![BSON](http://i64.tinypic.com/2wnu3qr.png)
+
 A NoSQL Document based DB implementation on top of the Ethereum Project blockchain.
 
 The driver will use a subset of the BSON binary seralization to store and handle NoSQL documents in Json format.
