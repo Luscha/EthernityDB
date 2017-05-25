@@ -1,33 +1,5 @@
 pragma solidity ^0.4.11;
 
-/*
-//////////////////////////////////////////////////////////////////////////////
-////////////// Insertion Query Example
-//////////////////////////////////////////////////////////////////////////////
-Bson converter (external) converts a Json in a Bson
-  -> from { item: "journal", qty: 25, size: { h: 14, w: 21, uom: "cm" }, rate: 2.3 }
-  -> to Binary Bson Data bData
-    -> Check that the Bson contains only "allowed data types" (see grammar)
-  -> database.queryInsert(collectionName, bData)
-  -> Insertion in a new entry with parsing for useful information
-
-//////////////////////////////////////////////////////////////////////////////
-////////////// Select Query Example
-//////////////////////////////////////////////////////////////////////////////
-Allowed operation: = (later <, <=, >, >=, !=)
-Follow MongoDB query grammar passing a single Json to the contract that contains
-all the clauses.
-The only operation on the embeed document and array is the equality, that returns every
-document which contains the embeed document provided (not strictly equal):
-  -> select({ size: { h: 14 } })
-    -> returns the document used in the insert example
-
-  -> select * where qty = 25 or size.h = 15
-    -> select("\n6F": [ { qty: 25 }, { size: { h: 25 } } ])
-
-  -> select * where qty = 25 or size.h >= 15
-    -> select("\n6F": [ { qty: 25 }, { size: { h: { "\n6D": 25 } } ])
-*/
 import "lib/stringUtils.sol";
 import "lib/bytesUtils.sol";
 import "queryengine.sol";
