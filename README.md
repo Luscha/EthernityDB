@@ -48,7 +48,7 @@ First steps: Deploy a Database
 -------------
 If you already know a deployed driver, just deploy the database contract referencing to the driver contract address. Otherwise deploy the full system.
 
-<pre><code>
+```javascript
 const Web3 = require('web3');
 // Connect to Ethereum node
 const web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
@@ -65,13 +65,13 @@ var db = web3.eth.contract(dbABI);
 var dbBytecodeConstructed = db.new.getData(dbName, private, driverAddress,
                         {data: '0x' + bytecode});
 ... // Deploy database
-</code></pre>
+```
 
 Create Collections in the Database
 -------------
 Once the database has been created you can create a collection calling the function "newCollection" of your fresh created database contract.
 
-<pre><code>
+```javascript
 const Web3 = require('web3');
 // Connect to Ethereum node
 const web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
@@ -87,7 +87,7 @@ var collectionName = // Name of your new collection
 
 var myCallData = db.newCollection.getData(collectionName);
 ... // Send transaction
-</code></pre>
+```
 
 Insert Documents in the Collections
 -------------------------------
@@ -95,7 +95,7 @@ Now it's possible to insert documents in the new collection.
 
 To do that is required to transform the document from the Json format to BSON forma, then split the BSON bytestring in an array of Hex bytes. Finally send the data to the database contract.
 
-<pre><code>
+```javascript
 const Web3 = require('web3');
 const BSON = require('bson')
 const bson = new BSON();
@@ -122,13 +122,13 @@ var collectionName = // Name of the collection where the document has to be stor
 
 var myCallData = db.queryInsert.getData(collectionName, hexArrayQuery);
 ... // Send transaction
-</code></pre>
+```
 
 Query the database
 -------------------------------
 To query a database is required the same process of the insertion to convert a Json query to a BSON query understandable by the database contract.
 
-<pre><code>
+```javascript
 const Web3 = require('web3');
 const BSON = require('bson')
 const jsonfile = require('jsonfile')
@@ -172,6 +172,4 @@ if (i == -1) { // if
 
 var buffer = byteBuffer.fromHex(String(BSONbytes).substr(2))["buffer"];
 console.log("Result" + n + ": " + JSON.stringify(bson.deserialize(buffer)));
-
-
-</code></pre>
+```
