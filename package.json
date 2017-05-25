@@ -1,5 +1,5 @@
 {
-  "name": "EternityDB",
+  "name": "EthernityDB",
   "version": "0.0.1",
   "description": "A NoSQL Document based DB implementation on top of the Ethereum Project blockchain",
   "main": "main.js",
@@ -10,11 +10,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Luscha/EternityDB.git"
+    "url": "git+https://github.com/Luscha/EthernityDB.git"
   },
   "author": "",
   "license": "ISC",
-  "homepage": "https://github.com/Luscha/EternityDB#readme",
+  "homepage": "https://github.com/Luscha/EthernityDB#readme",
   "dependencies": {
     "bson": "^1.0.4",
     "bytebuffer": "^5.0.1",

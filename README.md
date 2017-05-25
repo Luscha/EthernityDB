@@ -1,4 +1,4 @@
-# EternityDB
+# EthernityDB
 ![Ethereum Project](https://chocolatey.org/content/packageimages/AlethZero-Latest.0.8.2.54-latest.png)
 ![BSON](http://i64.tinypic.com/2wnu3qr.png)
 
