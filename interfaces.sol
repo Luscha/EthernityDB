@@ -6,7 +6,7 @@ contract DriverAbstract {
   function registerDatabase(address owner, string strName, DBAbstract db);
   function getDatabase(address owner, string strName) constant returns (DBAbstract);
 
-  function processInsertion(byte[] query) constant returns (bytes12, bytes21);
+  function processInsertion(byte[] query, bool verbose) constant returns (bytes12, bytes21);
   function processQuery(byte[] query, DocumentAbstract doc) constant returns (bool);
 }
 
@@ -27,9 +27,12 @@ contract DBAbstract {
   string public name;
   uint64 public collectionCount;
   bool public isPrivate;
+  bool public isVerbose;
 
   function changeDriver(DriverAbstract newDriver);
   function getDriver() constant returns (DriverAbstract);
+
+  function setVerbose(bool flag);
 
   function migrateDatabase(DBAbstract to);
   function receiveMigratingCollection(string name);

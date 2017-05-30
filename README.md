@@ -63,9 +63,10 @@ var driverAddress = ... // Address of the driver contract
 
 var dbName = ... // Name of your database
 var private = ... // True if only you can insert document, false otherwise
+var verbose = ... // True if you the validation of the insert data is required (doubles the fee)
 var db = web3.eth.contract(dbABI);
 
-var dbBytecodeConstructed = db.new.getData(dbName, private, driverAddress,
+var dbBytecodeConstructed = db.new.getData(dbName, private, verbose, driverAddress,
                         {data: '0x' + bytecode});
 ... // Deploy database
 ```

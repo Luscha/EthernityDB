@@ -11,12 +11,18 @@ contract Database is DBAbstract {
         _;
   }
 
-  function Database(string strName, bool bPrivate, DriverAbstract _driver) {
+  function Database(string strName, bool bPrivate, bool bVerbose, DriverAbstract _driver) {
     owner = msg.sender;
     name = strName;
     isPrivate = bPrivate;
+    isVerbose = bVerbose;
     driver = _driver;
     driver.registerDatabase(owner, strName, this);
+  }
+
+  function setVerbose(bool flag) {
+    if (msg.sender != owner) throw;
+    isVerbose = flag;
   }
 
   ////////////////////////////////////////////
@@ -105,7 +111,7 @@ contract Database is DBAbstract {
 
     bytes12 id;
     bytes21 head;
-    (id, head) = driver.processInsertion(data);
+    (id, head) = driver.processInsertion(data, isVerbose);
     if (address(documentByID[id]) != 0x0) throw;
 
     d = new Document(data, head);

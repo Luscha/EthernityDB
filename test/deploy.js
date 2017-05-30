@@ -14,7 +14,7 @@ var compiledLibraries = {};
 var gasSpent = 0;
 
 // Database creation param
-var databaseConstructorParam = {"name" : "Database di prova", "private" : true};
+var databaseConstructorParam = {"name" : "Database di prova", "private" : true, "verbose" : false};
 
 function unlockAccount(){
     var accounts = web3.eth.accounts;
@@ -169,6 +169,7 @@ function deployDB(bytecode) {
 
 	var dbBytecode = db.new.getData(databaseConstructorParam["name"],
 													databaseConstructorParam["private"],
+													databaseConstructorParam["verbose"],
 													compiledConstracts["driver"]["address"],
 													{data: '0x' + bytecode});
 
