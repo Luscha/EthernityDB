@@ -14,7 +14,7 @@ var compiledLibraries = {};
 var gasSpent = 0;
 
 // Database creation param
-var databaseConstructorParam = {"name" : "Database di prova", "private" : true, "verbose" : false};
+var databaseConstructorParam = {"name" : "Database di prova", "private" : true, "verbose" : true};
 
 function unlockAccount(){
     var accounts = web3.eth.accounts;
