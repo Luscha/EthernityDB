@@ -48,6 +48,6 @@ contract DBAbstract {
 }
 
 contract DocumentAbstract {
-  byte[65536] public data;
+  byte[4096] public data;
   uint32 public length;
 }
