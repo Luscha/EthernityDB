@@ -1,10 +1,16 @@
 pragma solidity ^0.4.11;
 import "lib/stringUtils.sol";
+import "lib/flag.sol";
 import "interfaces.sol";
 import "document.sol";
 
 contract Database is DBAbstract {
   using StringUtils for string;
+  using Flag for uint32;
+
+  enum dbFlags {PRIVATE, VERBOSE}
+
+  uint32 private flag;
 
   modifier OnlyDriver {
       if (msg.sender != address(driver)) throw;
@@ -14,15 +20,39 @@ contract Database is DBAbstract {
   function Database(string strName, bool bPrivate, bool bVerbose, DriverAbstract _driver) {
     owner = msg.sender;
     name = strName;
-    isPrivate = bPrivate;
-    isVerbose = bVerbose;
+
+    if (bPrivate)
+      flag.setBit(uint8(dbFlags.PRIVATE));
+    if (bVerbose)
+      flag.setBit(uint8(dbFlags.VERBOSE));
+
     driver = _driver;
     driver.registerDatabase(owner, strName, this);
   }
 
-  function setVerbose(bool flag) {
+  function setVerbose(bool _flag) {
     if (msg.sender != owner) throw;
-    isVerbose = flag;
+    if (true == _flag)
+      flag.setBit(uint8(dbFlags.VERBOSE));
+    else
+      flag.removeBit(uint8(dbFlags.VERBOSE));
+  }
+
+  function setPrivate(bool _flag) {
+    if (msg.sender != owner) throw;
+    if (true == _flag)
+      flag.setBit(uint8(dbFlags.PRIVATE));
+    else
+      flag.removeBit(uint8(dbFlags.PRIVATE));
+  }
+
+  function isVerbose() constant returns (bool) {
+    return flag.isBit(uint8(dbFlags.VERBOSE));
+  }
+
+  function isPrivate() constant returns (bool) {
+    return flag.isBit(uint8(dbFlags.PRIVATE));
+  }
   }
 
   ////////////////////////////////////////////
@@ -66,7 +96,7 @@ contract Database is DBAbstract {
   /// Collection Related
   function newCollection(string strName) {
     if (getCollection(strName).init != false) throw;
-    if (true == isPrivate && msg.sender != owner) throw;
+    if (true == isPrivate() && msg.sender != owner) throw;
 
     collectionsByName[bytes8(strName.toBytes32())].init = true;
     collectionsByName[bytes8(strName.toBytes32())].name = strName;
@@ -105,9 +135,9 @@ contract Database is DBAbstract {
 
   ////////////////////////////////////////////
   /// Query Related
-    if (true == isPrivate && msg.sender != owner) throw;
     if (getCollection(collection).init == false) throw;
   function queryInsert(string collection, byte[] data, bytes12 preID) {
+    if (true == isPrivate() && msg.sender != owner) throw;
 
     bytes12 id;
     bytes21 head;

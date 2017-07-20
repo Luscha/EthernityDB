@@ -24,13 +24,9 @@ contract DBAbstract {
   address public owner;
   string public name;
   uint64 public collectionCount;
-  bool public isPrivate;
-  bool public isVerbose;
-
   function changeDriver(DriverAbstract newDriver);
   function getDriver() constant returns (DriverAbstract);
 
-  function setVerbose(bool flag);
 
   function migrateDatabase(DBAbstract to);
   function receiveMigratingCollection(string name);
