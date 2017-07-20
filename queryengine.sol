@@ -95,7 +95,7 @@ contract QueryEngine {
     return success;
   }
 
-  function checkDocumentValidity(byte[] data, bytes3 idName) constant returns (bool) {
+  function checkDocumentValidity(byte[] data, bytes3 idName, bool generateID) constant returns (bool) {
     // If the length is less or equal 5 the document is empty.
     if (data.length <= 5) {
       return false;
@@ -122,7 +122,7 @@ contract QueryEngine {
             bType == 0x09  || (bType >= 0x0B  && bType <= 0x0F))
             return false;
         // chack idName
-        if (n.depth == 0 && idName7 == name7)
+        if (generateID == false && n.depth == 0 && idName7 == name7)
           return false;
       }
     }

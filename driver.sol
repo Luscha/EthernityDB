@@ -28,9 +28,14 @@ contract Driver is DriverAbstract {
     return databasesByName[owner][strName.toBytes32()];
   }
 
-  function processInsertion(byte[] data, bool verbose) constant returns (bytes12 id, bytes21 head) {
-    if (true == verbose && false == queryEngine.checkDocumentValidity(data, idKeyName)) throw;
-    (id, head) = getDocumentHead(data);
+  function processInsertion(byte[] data, bool verbose, bool generateID) constant returns (bytes12 id, bytes21 head) {
+    if (true == verbose && false == queryEngine.checkDocumentValidity(data, idKeyName, generateID)) throw;
+    if (generateID) {
+      (id, head) = getDocumentHead(data);
+    }
+    else {
+      return (0, 0);
+    }
   }
 
   function processQuery(byte[] query, DocumentAbstract doc) constant returns (bool) {

@@ -4,8 +4,8 @@ contract DriverAbstract {
   function registerDatabase(address owner, string strName, DBAbstract db);
   function getDatabase(address owner, string strName) constant returns (DBAbstract);
 
-  function processInsertion(byte[] query, bool verbose) constant returns (bytes12, bytes21);
   function processQuery(byte[] query, DocumentAbstract doc) constant returns (bool);
+  function processInsertion(byte[] query, bool verbose, bool generateID) constant returns (bytes12, bytes21);
 }
 
 contract DBAbstract {
@@ -41,7 +41,7 @@ contract DBAbstract {
 
   function getDocument(string collection, uint64 index) constant returns (bytes12, bytes);
 
-  function queryInsert(string collection, byte[] data) returns (DocumentAbstract);
+  function queryInsert(string collection, byte[] data, bytes12 preID);
   function queryFind(string collection, uint64 index, byte[] query) constant returns (bytes12, int64, bytes);
 }
 

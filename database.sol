@@ -105,17 +105,23 @@ contract Database is DBAbstract {
 
   ////////////////////////////////////////////
   /// Query Related
-  function queryInsert(string collection, byte[] data) returns (DocumentAbstract d) {
     if (true == isPrivate && msg.sender != owner) throw;
     if (getCollection(collection).init == false) throw;
+  function queryInsert(string collection, byte[] data, bytes12 preID) {
 
     bytes12 id;
     bytes21 head;
-    (id, head) = driver.processInsertion(data, isVerbose);
     if (address(documentByID[id]) != 0x0) throw;
 
     d = new Document(data, head);
     insertDocument(collection, id, d);
+    (id, head) = driver.processInsertion(data, isVerbose(), preID == bytes12(0));
+    if (preID == bytes21(0)) {
+      getCollection(collection).insertDocument(id, head, data);
+    }
+    else {
+      getCollection(collection).insertDocument(preID, bytes21(0), data);
+    }
   }
 
   function queryFind(string collection, uint64 index, byte[] query) constant returns (bytes12, int64, bytes) {
