@@ -38,10 +38,10 @@ contract Driver is DriverAbstract {
     }
   }
 
-  function processQuery(byte[] query, DocumentAbstract doc) constant returns (bool) {
-    byte[] memory data = new byte[](doc.length());
-    for (uint32 i = 0; i < doc.length(); i++) {
-      data[i] = doc.data(i);
+  function processQuery(byte[] query, bytes doc) constant returns (bool) {
+    byte[] memory data = new byte[](doc.length);
+    for (uint32 i = 0; i < doc.length; i++) {
+      data[i] = doc[i];
     }
     return queryEngine.processQuery(query, data);
   }

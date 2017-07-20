@@ -4,36 +4,22 @@ contract DriverAbstract {
   function registerDatabase(address owner, string strName, DBAbstract db);
   function getDatabase(address owner, string strName) constant returns (DBAbstract);
 
-  function processQuery(byte[] query, DocumentAbstract doc) constant returns (bool);
   function processInsertion(byte[] query, bool verbose, bool generateID) constant returns (bytes12, bytes21);
+  function processQuery(byte[] query, bytes doc) constant returns (bool);
 }
 
 contract DBAbstract {
-  struct Collection {
-    bytes12[] documentIDArray;
-    string name;
-    uint64 count;
-    bool init;
-  }
-
-  mapping (bytes8 => Collection) public collectionsByName;
-  mapping (uint64 => bytes8) public collectionsIDByIndex;
-  mapping (bytes12 => DocumentAbstract) public documentByID;
-
-  DriverAbstract internal driver;
-  address public owner;
-  string public name;
-  uint64 public collectionCount;
   function changeDriver(DriverAbstract newDriver);
   function getDriver() constant returns (DriverAbstract);
 
+  function getName() constant returns (string);
+  function getOwner() constant returns (address);
 
   function migrateDatabase(DBAbstract to);
-  function receiveMigratingCollection(string name);
-  function receiveMigratingDocument(string collection, bytes12 id, DocumentAbstract doc);
+  function receiveMigratingCollection(CollectionAbstract c, bytes8 name);
 
   function newCollection(string strName);
-  function getCollectionMetadata(string strName) constant returns (bytes8, uint64);
+  function getCollection(string strName) constant returns (CollectionAbstract);
 
   function getDocument(string collection, uint64 index) constant returns (bytes12, bytes);
 
@@ -41,7 +27,14 @@ contract DBAbstract {
   function queryFind(string collection, uint64 index, byte[] query) constant returns (bytes12, int64, bytes);
 }
 
-contract DocumentAbstract {
-  byte[4096] public data;
-  uint32 public length;
+contract CollectionAbstract {
+  function changeDB(DBAbstract db);
+  function getDocumentCount() constant returns (uint64);
+  function getName() constant returns (string);
+
+  function getDocumentByteAt(bytes12 id, uint64 i) constant returns (byte);
+  function getDocumentIDbyIndex(uint64 i) constant returns (bytes12);
+  function getDocumentLengthbyIndex(uint64 i) constant returns (uint32);
+
+  function insertDocument(bytes12 id, bytes21 head, byte[] data);
 }

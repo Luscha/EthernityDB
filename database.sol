@@ -2,7 +2,7 @@ pragma solidity ^0.4.11;
 import "lib/stringUtils.sol";
 import "lib/flag.sol";
 import "interfaces.sol";
-import "document.sol";
+import "collection.sol";
 
 contract Database is DBAbstract {
   using StringUtils for string;
@@ -10,6 +10,14 @@ contract Database is DBAbstract {
 
   enum dbFlags {PRIVATE, VERBOSE}
 
+  mapping (uint64 => bytes8) private collectionsIDByIndex;
+  mapping (bytes8 => CollectionAbstract) private collectionsByName;
+
+  DriverAbstract internal driver;
+  address public owner;
+  string public name;
+
+  uint64 private collectionCount;
   uint32 private flag;
 
   modifier OnlyDriver {
@@ -53,6 +61,13 @@ contract Database is DBAbstract {
   function isPrivate() constant returns (bool) {
     return flag.isBit(uint8(dbFlags.PRIVATE));
   }
+
+  function documentToBytes(CollectionAbstract c, uint64 index) internal constant returns (bytes12 id, bytes memory data) {
+    id = c.getDocumentIDbyIndex(index);
+    data = new bytes(c.getDocumentLengthbyIndex(index));
+    for (uint32 i = 0; i < c.getDocumentLengthbyIndex(index); i++) {
+    data[i] = c.getDocumentByteAt(id, i);
+    }
   }
 
   ////////////////////////////////////////////
@@ -72,79 +87,51 @@ contract Database is DBAbstract {
   function migrateDatabase(DBAbstract to) {
     if (tx.origin != owner) throw;
     uint64 i = 0;
-    uint64 j = 0;
     for (i = 0; i < collectionCount; i++) {
-      Collection c = collectionsByName[collectionsIDByIndex[i]];
-      to.receiveMigratingCollection(c.name);
-      for (j = 0; j < c.count; j++) {
-        to.receiveMigratingDocument(c.name, c.documentIDArray[j], documentByID[c.documentIDArray[j]]);
-      }
+      CollectionAbstract c = collectionsByName[collectionsIDByIndex[i]];
+      to.receiveMigratingCollection(c, collectionsIDByIndex[i]);
+      c.changeDB(to);
     }
   }
 
-  function receiveMigratingCollection(string name) {
+  function receiveMigratingCollection(CollectionAbstract c, bytes8 name) {
     if (tx.origin != owner) throw;
-    newCollection(name);
-  }
-
-  function receiveMigratingDocument(string collection, bytes12 id, DocumentAbstract doc) {
-    if (tx.origin != owner) throw;
-    insertDocument(collection, id, doc);
+    if (address(c) == 0x0) throw;
+    collectionsByName[name] = c;
+    collectionsIDByIndex[collectionCount++] = name;
   }
 
   ////////////////////////////////////////////
   /// Collection Related
   function newCollection(string strName) {
-    if (getCollection(strName).init != false) throw;
+    if (address(getCollection(strName)) != 0x0) throw;
     if (true == isPrivate() && msg.sender != owner) throw;
 
-    collectionsByName[bytes8(strName.toBytes32())].init = true;
-    collectionsByName[bytes8(strName.toBytes32())].name = strName;
+    Collection c = new Collection(strName, this);
+    collectionsByName[bytes8(strName.toBytes32())] = c;
     collectionsIDByIndex[collectionCount++] = bytes8(strName.toBytes32());
   }
 
-  function getCollection(string strName) constant internal returns (Collection storage) {
+  function getCollection(string strName) constant returns (CollectionAbstract) {
     return collectionsByName[bytes8(strName.toBytes32())];
-  }
-
-  function getCollectionMetadata(string strName) constant returns (bytes8 name, uint64 count) {
-    if (getCollection(strName).init == false) throw;
-    name = bytes8(strName.toBytes32());
-    count = getCollection(strName).count;
-  }
-
-  function insertDocument(string collection, bytes12 id, DocumentAbstract doc) private {
-    getCollection(collection).documentIDArray.push(id);
-    getCollection(collection).count++;
-    documentByID[id] = doc;
   }
 
   ////////////////////////////////////////////
   /// Document Related
   function getDocument(string collection, uint64 index) constant returns (bytes12, bytes) {
-    if (getCollection(collection).init == false) throw;
-    if (getCollection(collection).count <= index) throw;
-    bytes12 id = getCollection(collection).documentIDArray[index];
-    DocumentAbstract doc = documentByID[id];
-    bytes memory data = new bytes(doc.length());
-    for (uint32 i = 0; i < doc.length(); i++) {
-      data[i] = doc.data(i);
-    }
-    return (id, data);
+    if (address(getCollection(collection)) == 0x0) throw;
+    if (getCollection(collection).getDocumentCount() <= index) throw;
+    return documentToBytes(getCollection(collection), index);
   }
 
   ////////////////////////////////////////////
   /// Query Related
-    if (getCollection(collection).init == false) throw;
   function queryInsert(string collection, byte[] data, bytes12 preID) {
     if (true == isPrivate() && msg.sender != owner) throw;
+    if (address(getCollection(collection)) == 0x0) throw;
 
     bytes12 id;
     bytes21 head;
-    if (address(documentByID[id]) != 0x0) throw;
-
-    d = new Document(data, head);
-    insertDocument(collection, id, d);
     (id, head) = driver.processInsertion(data, isVerbose(), preID == bytes12(0));
     if (preID == bytes21(0)) {
       getCollection(collection).insertDocument(id, head, data);
@@ -155,17 +142,15 @@ contract Database is DBAbstract {
   }
 
   function queryFind(string collection, uint64 index, byte[] query) constant returns (bytes12, int64, bytes) {
-    Collection c = getCollection(collection);
-    DocumentAbstract doc;
-    if (c.init == false) throw;
-    for (index; index < c.count; index++) {
-      doc = documentByID[c.documentIDArray[index]];
-      if (true == driver.processQuery(query, doc)) {
-        bytes memory data = new bytes(doc.length());
-        for (uint32 i = 0; i < doc.length(); i++) {
-          data[i] = doc.data(i);
-        }
-        return (c.documentIDArray[index], int64(index), data);
+    CollectionAbstract c = getCollection(collection);
+    if (address(c) == 0x0) throw;
+    bytes12 id;
+    bytes memory data;
+    for (index; index < c.getDocumentCount(); index++) {
+      (id, data) = documentToBytes(c, index);
+      if (true == driver.processQuery(query, data)) {
+        (id, data) = documentToBytes(c, index);
+        return (id, int64(index), data);
       }
     }
     return (bytes12(0), -1, new bytes(0));
