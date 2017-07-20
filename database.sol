@@ -132,8 +132,8 @@ contract Database is DBAbstract {
 
     bytes12 id;
     bytes21 head;
-    (id, head) = driver.processInsertion(data, isVerbose(), preID == bytes12(0));
-    if (preID == bytes21(0)) {
+    (id, head) = driver.processInsertion(data, isVerbose(), preID == bytes12(0) && false == isPrivate());
+    if (preID == bytes21(0) || false == isPrivate()) {
       getCollection(collection).insertDocument(id, head, data);
     }
     else {
