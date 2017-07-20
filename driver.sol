@@ -9,6 +9,8 @@ contract Driver is DriverAbstract {
   using StringUtils for string;
   using BytesUtils for byte[];
 
+  mapping (address => mapping (bytes32 => DBAbstract)) private databasesByName;
+
   bytes5 constant idKeyNameEncoded = 0x075F696400;
   bytes3 constant idKeyName = 0x5F6964;
   QueryEngine queryEngine;
