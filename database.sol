@@ -1,4 +1,5 @@
 pragma solidity ^0.4.11;
+
 import "lib/stringUtils.sol";
 import "lib/flag.sol";
 import "interfaces.sol";
@@ -13,9 +14,9 @@ contract Database is DBAbstract {
   mapping (uint64 => bytes8) private collectionsIDByIndex;
   mapping (bytes8 => CollectionAbstract) private collectionsByName;
 
-  DriverAbstract internal driver;
-  address public owner;
-  string public name;
+  DriverAbstract private driver;
+  address private owner;
+  string private name;
 
   uint64 private collectionCount;
   uint32 private flag;
@@ -60,6 +61,18 @@ contract Database is DBAbstract {
 
   function isPrivate() constant returns (bool) {
     return flag.isBit(uint8(dbFlags.PRIVATE));
+  }
+
+  function allowsPreIDs() constant returns (bool) {
+    return !isVerbose() || isPrivate();
+  }
+
+  function getName() constant returns (string) {
+    return name;
+  }
+
+  function getOwner() constant returns (address) {
+    return owner;
   }
 
   function documentToBytes(CollectionAbstract c, uint64 index) internal constant returns (bytes12 id, bytes memory data) {
