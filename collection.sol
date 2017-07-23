@@ -13,6 +13,7 @@ contract Collection is CollectionAbstract {
   function Collection(string _name, DBAbstract _db) {
     db = _db;
     name = _name;
+    count = 0;
   }
 
   function changeDB(DBAbstract _db) {
@@ -41,9 +42,9 @@ contract Collection is CollectionAbstract {
   }
 
   function insertDocument(bytes12 id, bytes21 head, byte[] data) {
-    uint32 i = 0;
     require(msg.sender == address(db));
     require(documentByID[id][0] == 0x0);
+    uint256 i = 0;
     if (head == bytes21(0)) {
       for (; i < 21; i++) {
           documentByID[id][i] = head[i];
@@ -51,15 +52,15 @@ contract Collection is CollectionAbstract {
       for (i = 4; i < data.length; i++) {
           documentByID[id][i - 4 + 21] = data[i];
       }
-      documentLengths[count] = uint32(data.length) - 4 + 21;
+      documentLengths.push(uint32(data.length) - 4 + 21);
     } else {
       for (; i < data.length; i++) {
           documentByID[id][i - 4 + 21] = data[i];
       }
-      documentLengths[count] = uint32(data.length);
+      documentLengths.push(uint32(data.length));
     }
 
-    documentIDs[count] = id;
+    documentIDs.push(id);
     count++;
   }
 }
