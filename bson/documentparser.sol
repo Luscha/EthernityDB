@@ -80,7 +80,7 @@ library DocumentParser {
         }
         if (bType == 0x03 || bType == 0x04) {
           // For now we let only up to 32 nested document level
-          if (documentIndex > 31) throw;
+          require(documentIndex <= 31);
           tree = tree.addChild(b8Name);
           embeedDocumentStack[uint8(++documentIndex)] = i + nDataLen - 1;
           i += nDataStart - 1;

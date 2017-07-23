@@ -20,7 +20,7 @@ contract Driver is DriverAbstract {
   }
 
   function registerDatabase(address owner, string strName, DBAbstract db) {
-    if (address(getDatabase(owner, strName)) != 0x0) throw;
+    require(address(getDatabase(owner, strName)) == 0x0);
     databasesByName[msg.sender][strName.toBytes32()] = db;
   }
 
@@ -29,9 +29,10 @@ contract Driver is DriverAbstract {
   }
 
   function processInsertion(byte[] data, bool verbose, bool generateID) constant returns (bytes12 id, bytes21 head) {
-    if (true == verbose && false == queryEngine.checkDocumentValidity(data, idKeyName, generateID)) throw;
     if (generateID) {
       (id, head) = getDocumentHead(data);
+    if (true == verbose) {
+      assert(true == queryEngine.checkDocumentValidity(data, idKeyName, generateID));
     }
     else {
       return (0, 0);

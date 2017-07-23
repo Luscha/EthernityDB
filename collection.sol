@@ -16,7 +16,7 @@ contract Collection is CollectionAbstract {
   }
 
   function changeDB(DBAbstract _db) {
-    if (msg.sender != address(db)) throw;
+    require(msg.sender == address(db));
     db = _db;
   }
 
@@ -41,8 +41,9 @@ contract Collection is CollectionAbstract {
   }
 
   function insertDocument(bytes12 id, bytes21 head, byte[] data) {
-    if (msg.sender != address(db)) throw;
     uint32 i = 0;
+    require(msg.sender == address(db));
+    require(documentByID[id][0] == 0x0);
     if (head == bytes21(0)) {
       for (; i < 21; i++) {
           documentByID[id][i] = head[i];

@@ -21,7 +21,7 @@ contract Database is DBAbstract {
   uint32 private flag;
 
   modifier OnlyDriver {
-      if (msg.sender != address(driver)) throw;
+      require(msg.sender == address(driver));
         _;
   }
 
@@ -39,7 +39,7 @@ contract Database is DBAbstract {
   }
 
   function setVerbose(bool _flag) {
-    if (msg.sender != owner) throw;
+    require(msg.sender == owner);
     if (true == _flag)
       flag.setBit(uint8(dbFlags.VERBOSE));
     else
@@ -47,7 +47,7 @@ contract Database is DBAbstract {
   }
 
   function setPrivate(bool _flag) {
-    if (msg.sender != owner) throw;
+    require(msg.sender == owner);
     if (true == _flag)
       flag.setBit(uint8(dbFlags.PRIVATE));
     else
@@ -73,7 +73,7 @@ contract Database is DBAbstract {
   ////////////////////////////////////////////
   /// Driver Related
   function changeDriver(DriverAbstract newDriver) {
-    if (msg.sender != owner) throw;
+    require(msg.sender == owner);
     driver = newDriver;
     driver.registerDatabase(owner, name, this);
   }
@@ -85,7 +85,7 @@ contract Database is DBAbstract {
   ////////////////////////////////////////////
   /// Database Related
   function migrateDatabase(DBAbstract to) {
-    if (tx.origin != owner) throw;
+    require(tx.origin == owner);
     uint64 i = 0;
     for (i = 0; i < collectionCount; i++) {
       CollectionAbstract c = collectionsByName[collectionsIDByIndex[i]];
@@ -95,8 +95,8 @@ contract Database is DBAbstract {
   }
 
   function receiveMigratingCollection(CollectionAbstract c, bytes8 name) {
-    if (tx.origin != owner) throw;
-    if (address(c) == 0x0) throw;
+    require(tx.origin == owner);
+    require(address(c) != 0x0);
     collectionsByName[name] = c;
     collectionsIDByIndex[collectionCount++] = name;
   }
@@ -104,8 +104,8 @@ contract Database is DBAbstract {
   ////////////////////////////////////////////
   /// Collection Related
   function newCollection(string strName) {
-    if (address(getCollection(strName)) != 0x0) throw;
-    if (true == isPrivate() && msg.sender != owner) throw;
+    require(false == isPrivate() || msg.sender == owner);
+    require(address(getCollection(strName)) == 0x0);
 
     Collection c = new Collection(strName, this);
     collectionsByName[bytes8(strName.toBytes32())] = c;
@@ -119,16 +119,16 @@ contract Database is DBAbstract {
   ////////////////////////////////////////////
   /// Document Related
   function getDocument(string collection, uint64 index) constant returns (bytes12, bytes) {
-    if (address(getCollection(collection)) == 0x0) throw;
-    if (getCollection(collection).getDocumentCount() <= index) throw;
+    require(address(getCollection(collection)) != 0x0);
+    require(getCollection(collection).getDocumentCount() > index);
     return documentToBytes(getCollection(collection), index);
   }
 
   ////////////////////////////////////////////
   /// Query Related
   function queryInsert(string collection, byte[] data, bytes12 preID) {
-    if (true == isPrivate() && msg.sender != owner) throw;
-    if (address(getCollection(collection)) == 0x0) throw;
+    require(false == isPrivate() || msg.sender == owner);
+    require(address(getCollection(collection)) != 0x0);
 
     bytes12 id;
     bytes21 head;
@@ -143,7 +143,7 @@ contract Database is DBAbstract {
 
   function queryFind(string collection, uint64 index, byte[] query) constant returns (bytes12, int64, bytes) {
     CollectionAbstract c = getCollection(collection);
-    if (address(c) == 0x0) throw;
+    require(address(c) != 0x0);
     bytes12 id;
     bytes memory data;
     for (index; index < c.getDocumentCount(); index++) {
