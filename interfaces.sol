@@ -1,6 +1,6 @@
 pragma solidity ^0.4.11;
 
-contract DriverAbstract {
+interface DriverAbstract {
   function registerDatabase(address owner, string strName, DBAbstract db);
   function getDatabase(address owner, string strName) constant returns (DBAbstract);
 
@@ -8,7 +8,7 @@ contract DriverAbstract {
   function processQuery(byte[] query, bytes doc) constant returns (bool);
 }
 
-contract DBAbstract {
+interface DBAbstract {
   function changeDriver(DriverAbstract newDriver);
   function getDriver() constant returns (DriverAbstract);
 
@@ -27,7 +27,7 @@ contract DBAbstract {
   function queryFind(string collection, uint64 index, byte[] query) constant returns (bytes12, int64, bytes);
 }
 
-contract CollectionAbstract {
+interface CollectionAbstract {
   function changeDB(DBAbstract db);
   function getDocumentCount() constant returns (uint64);
   function getName() constant returns (string);
