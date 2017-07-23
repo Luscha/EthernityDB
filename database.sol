@@ -126,19 +126,20 @@ contract Database is DBAbstract {
 
   ////////////////////////////////////////////
   /// Query Related
-  function queryInsert(string collection, byte[] data, bytes12 preID) {
+  function queryInsert(string collection, byte[] data, bytes12 preID)  returns (bytes12){
     require(false == isPrivate() || msg.sender == owner);
     require(address(getCollection(collection)) != 0x0);
 
     bytes12 id;
     bytes21 head;
-    (id, head) = driver.processInsertion(data, isVerbose(), preID == bytes12(0) && false == isPrivate());
-    if (preID == bytes21(0) || false == isPrivate()) {
+    (id, head) = driver.processInsertion(data, isVerbose(), preID == bytes12(0) || !allowsPreIDs());
+    if (preID == bytes21(0) || !allowsPreIDs()) {
       getCollection(collection).insertDocument(id, head, data);
+      return id;
     }
-    else {
-      getCollection(collection).insertDocument(preID, bytes21(0), data);
-    }
+
+    getCollection(collection).insertDocument(preID, bytes21(0), data);
+    return preID;
   }
 
   function queryFind(string collection, uint64 index, byte[] query) constant returns (bytes12, int64, bytes) {

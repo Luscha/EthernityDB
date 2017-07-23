@@ -23,7 +23,7 @@ contract DBAbstract {
 
   function getDocument(string collection, uint64 index) constant returns (bytes12, bytes);
 
-  function queryInsert(string collection, byte[] data, bytes12 preID);
+  function queryInsert(string collection, byte[] data, bytes12 preID) returns (bytes12);
   function queryFind(string collection, uint64 index, byte[] query) constant returns (bytes12, int64, bytes);
 }
 
