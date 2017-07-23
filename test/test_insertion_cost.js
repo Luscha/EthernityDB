@@ -52,7 +52,7 @@ function InsertCostTest(db, collectionName) {
   queriesPlain.forEach((q, index) => {
     var hexQ = hexStringToHexArray(bson.serialize(q).toString('hex'));
 
-  	var myCallData = db.queryInsert.getData(collectionName, hexQ);
+  	var myCallData = db.queryInsert.getData(collectionName, hexQ, "0x00000000000000000000000");
   	var estimate = web3.eth.estimateGas({data: myCallData, to: db.address});
 
   	console.log('    Estimated gas to insert ' + hexQ.length + ' bytes = ' + estimate);
@@ -65,7 +65,7 @@ function InsertNestedCostTest(db, collectionName) {
   queriesNested.forEach((q, index) => {
     var hexQ = hexStringToHexArray(bson.serialize(q).toString('hex'));
 
-  	var myCallData = db.queryInsert.getData(collectionName, hexQ);
+  	var myCallData = db.queryInsert.getData(collectionName, hexQ, "0x000000000000000000000000");
   	var estimate = web3.eth.estimateGas({data: myCallData, to: db.address});
 
   	console.log('    Estimated gas to insert ' + hexQ.length + ' bytes in ' + (getDepth(q) - 1) +' nested documents = ' + estimate);
@@ -100,8 +100,8 @@ function main () {
 	var dbInstance = buildDBContract(compiledConstracts["database"]);
 	var dbVerboseInstance = buildDBContract(compiledConstracts["database_verbose"]);
 	
-	//InsertCostTest(dbInstance, "a");
-	//InsertCostTest(dbVerboseInstance, "a");
+	InsertCostTest(dbInstance, "a");
+	InsertCostTest(dbVerboseInstance, "a");
 	
 	InsertNestedCostTest(dbInstance, "a");
 	InsertNestedCostTest(dbVerboseInstance, "a");

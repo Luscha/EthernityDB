@@ -61,11 +61,11 @@ function InsertTest(db, collectionName) {
   queries.forEach((q, index) => {
     var hexQ = hexStringToHexArray(bson.serialize(q).toString('hex'));
 
-  	var myCallData = db.queryInsert.getData(collectionName, hexQ);
+  	var myCallData = db.queryInsert.getData(collectionName, hexQ, "0x00000000000000000000000");
   	var estimate = web3.eth.estimateGas({data: myCallData, to: db.address});
 
   	console.log('    Estimated gas to insert ' + hexQ.length + ' bytes = ' + estimate);
-  	db.queryInsert(collectionName, hexQ, {
+  	db.queryInsert(collectionName, hexQ, "0x000000000000000000000000", {
   		from: web3.eth.coinbase,
   		gas: estimate + fee}, (err, res) => {
   		if (err) {

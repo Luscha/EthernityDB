@@ -14,7 +14,7 @@ var compiledLibraries = {};
 var gasSpent = 0;
 
 // Database creation param
-var databaseConstructorParam = {"name" : "Database di prova", "private" : true, "verbose" : true};
+var databaseConstructorParam = {"name" : "Database di prova", "private" : true, "verbose" : false};
 
 function unlockAccount(){
     var accounts = web3.eth.accounts;
@@ -31,14 +31,27 @@ function findImports(path) {
 		return { contents: fs.readFileSync('./bson/documentparser.sol').toString() }
 	else if (path === 'lib/bytesUtils.sol')
 		return { contents: fs.readFileSync('./lib/bytesUtils.sol').toString() }
+	else if (path === 'lib/flag.sol')
+		return { contents: fs.readFileSync('./lib/flag.sol').toString() }
 	else if (path === 'interfaces.sol')
 		return { contents: fs.readFileSync('./interfaces.sol').toString() }
 	else if (path === 'document.sol')
 		return { contents: fs.readFileSync('./document.sol').toString() }
 	else if (path === 'queryengine.sol')
 		return { contents: fs.readFileSync('./queryengine.sol').toString() }
+	else if (path === 'collection.sol')
+		return { contents: fs.readFileSync('./collection.sol').toString() }
 	else
 		return { error: 'File not found' }
+}
+
+function printErrors(bytecode) {
+	var hasErrors = false;
+	for (var error in bytecode.formal.errors) {
+		//console.log(bytecode.formal.errors[error]);
+		hasErrors = true;
+	}
+	return false;
 }
 
 function linkLibrary(bytecode, libraryName, address) {
@@ -205,12 +218,7 @@ function compileQueryEngine() {
 
 	var output = solc.compile({sources : input}, 1, findImports);
 
-	var hasErrors = false;
-	for (var error in output.errors) {
-		console.log(output.errors[error]);
-		hasErrors = true;
-	}
-	if (hasErrors) {
+	if (true == printErrors(output)) {
 		return;
 	}
 	compiledConstracts["queryengine"] = {};
@@ -229,12 +237,7 @@ function compileDriver() {
 
 	var output = solc.compile({sources : input}, 1, findImports);
 
-	var hasErrors = false;
-	for (var error in output.errors) {
-		console.log(output.errors[error]);
-		hasErrors = true;
-	}
-	if (hasErrors) {
+	if (true == printErrors(output)) {
 		return;
 	}
 	compiledConstracts["driver"] = {};
@@ -253,12 +256,7 @@ function compileDB() {
 
 	var output = solc.compile({sources : input}, 1, findImports);
 
-	var hasErrors = false;
-	for (var error in output.errors) {
-		console.log(output.errors[error]);
-		hasErrors = true;
-	}
-	if (hasErrors) {
+	if (true == printErrors(output)) {
 		return;
 	}
 	compiledConstracts["database"] = {};
