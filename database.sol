@@ -83,6 +83,17 @@ contract Database is DBAbstract {
     }
   }
 
+  function mergeHeadToData(bytes21 head, byte[] data) internal constant returns (byte[] memory merged) {
+    merged = new byte[](data.length - 4 + 21);
+    uint256 i = 0;
+    for (; i < 21; i++) {
+        merged[i] = head[i];
+    }
+    for (i = 4; i < data.length; i++) {
+        merged[i - 4 + 21] = data[i];
+    }
+  }
+
   ////////////////////////////////////////////
   /// Driver Related
   function changeDriver(DriverAbstract newDriver) {
