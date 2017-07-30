@@ -2,7 +2,7 @@ pragma solidity ^0.4.11;
 import "interfaces.sol";
 
 contract Collection is CollectionAbstract {
-  mapping (bytes12 => byte[4096]) private documentByID;
+  mapping (bytes12 => bytes32[256]) private documentByID;
 
   DBAbstract private db;
   bytes12[] private documentIDs;
@@ -30,7 +30,9 @@ contract Collection is CollectionAbstract {
   }
 
   function getDocumentByteAt(bytes12 id, uint64 i) constant returns (byte) {
-    return documentByID[id][i];
+    uint64 bi = i / 32;
+    uint64 off = i % 32;
+    return byte(documentByID[id][bi][off]);
   }
 
   function getDocumentIDbyIndex(uint64 i) constant returns (bytes12) {
@@ -41,25 +43,27 @@ contract Collection is CollectionAbstract {
     return documentLengths[i];
   }
 
-  function insertDocument(bytes12 id, bytes21 head, byte[] data) {
+  function insertDocument(bytes12 id, byte[] data) {
     require(msg.sender == address(db));
     require(documentByID[id][0] == 0x0);
     uint256 i = 0;
-    if (head == bytes21(0)) {
-      for (; i < 21; i++) {
-          documentByID[id][i] = head[i];
-      }
-      for (i = 4; i < data.length; i++) {
-          documentByID[id][i - 4 + 21] = data[i];
-      }
-      documentLengths.push(uint32(data.length) - 4 + 21);
+    bytes32[] memory data32;
+
+    if (data.length % 32 == 0) {
+        data32 = new bytes32[](data.length / 32);
     } else {
-      for (; i < data.length; i++) {
-          documentByID[id][i - 4 + 21] = data[i];
-      }
-      documentLengths.push(uint32(data.length));
+        data32 = new bytes32[](data.length / 32 + 1);
     }
 
+    for (i = 0; i < data.length; i++) {
+        data32[i / 32] |= bytes32(data[i]) >> ((i % 32) * 8);
+    }
+
+    for (i = 0; i < data32.length; i++) {
+        documentByID[id][i] = data32[i];
+    }
+
+    documentLengths.push(uint32(data.length));
     documentIDs.push(id);
     count++;
   }

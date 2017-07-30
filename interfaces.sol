@@ -36,5 +36,5 @@ interface CollectionAbstract {
   function getDocumentIDbyIndex(uint64 i) constant returns (bytes12);
   function getDocumentLengthbyIndex(uint64 i) constant returns (uint32);
 
-  function insertDocument(bytes12 id, bytes21 head, byte[] data);
+  function insertDocument(bytes12 id, byte[] data);
 }

@@ -158,11 +158,12 @@ contract Database is DBAbstract {
     bytes21 head;
     (id, head) = driver.processInsertion(data, isVerbose(), preID == bytes12(0) || !allowsPreIDs());
     if (preID == bytes21(0) || !allowsPreIDs()) {
-      getCollection(collection).insertDocument(id, head, data);
+      byte[] memory merged = mergeHeadToData(head, data);
+      getCollection(collection).insertDocument(id, merged);
       return id;
     }
 
-    getCollection(collection).insertDocument(preID, bytes21(0), data);
+    getCollection(collection).insertDocument(preID, data);
     return preID;
   }
 
