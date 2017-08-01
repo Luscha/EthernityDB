@@ -18,7 +18,7 @@ interface DBAbstract {
   function migrateDatabase(DBAbstract to);
   function receiveMigratingCollection(CollectionAbstract c, bytes8 name);
 
-  function newCollection(string strName);
+  function newCollection(string strName) returns (CollectionAbstract);
   function getCollection(string strName) constant returns (CollectionAbstract);
 
   function getDocument(string collection, uint64 index) constant returns (bytes12, bytes);

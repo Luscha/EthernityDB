@@ -127,13 +127,14 @@ contract Database is DBAbstract {
 
   ////////////////////////////////////////////
   /// Collection Related
-  function newCollection(string strName) {
+  function newCollection(string strName) returns (CollectionAbstract) {
     require(false == isPrivate() || msg.sender == owner);
     require(address(getCollection(strName)) == 0x0);
 
     Collection c = new Collection(strName, this);
     collectionsByName[bytes8(strName.toBytes32())] = c;
     collectionsIDByIndex[collectionCount++] = bytes8(strName.toBytes32());
+    return c;
   }
 
   function getCollection(string strName) constant returns (CollectionAbstract) {
