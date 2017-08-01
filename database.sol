@@ -31,9 +31,9 @@ contract Database is DBAbstract {
     name = strName;
 
     if (bPrivate)
-      flag.setBit(uint8(dbFlags.PRIVATE));
+      flag = flag.setBit(uint8(dbFlags.PRIVATE));
     if (bVerbose)
-      flag.setBit(uint8(dbFlags.VERBOSE));
+      flag = flag.setBit(uint8(dbFlags.VERBOSE));
 
     driver = _driver;
     driver.registerDatabase(owner, strName, this);
@@ -42,17 +42,17 @@ contract Database is DBAbstract {
   function setVerbose(bool _flag) {
     require(msg.sender == owner);
     if (true == _flag)
-      flag.setBit(uint8(dbFlags.VERBOSE));
+      flag = flag.setBit(uint8(dbFlags.VERBOSE));
     else
-      flag.removeBit(uint8(dbFlags.VERBOSE));
+      flag = flag.removeBit(uint8(dbFlags.VERBOSE));
   }
 
   function setPrivate(bool _flag) {
     require(msg.sender == owner);
     if (true == _flag)
-      flag.setBit(uint8(dbFlags.PRIVATE));
+      flag = flag.setBit(uint8(dbFlags.PRIVATE));
     else
-      flag.removeBit(uint8(dbFlags.PRIVATE));
+      flag = flag.removeBit(uint8(dbFlags.PRIVATE));
   }
 
   function isVerbose() constant returns (bool) {
