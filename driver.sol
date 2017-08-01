@@ -51,8 +51,8 @@ contract Driver is DriverAbstract {
     // 3 bit blockSha3
     // 2 bit hash(seed, msg.sender)
     // 3 bit random
-    bytes32 blockSha3 = sha3(block.blockhash(block.number - 1), msg.sender);
-    bytes32 seedSha3 = sha3(seed, msg.sender);
+    bytes32 blockSha3 = sha3(block.blockhash(block.number - 1), tx.origin);
+    bytes32 seedSha3 = sha3(seed, tx.origin);
     bytes32 randomHash = sha3(blockSha3, seed);
 
     for (uint8 i = 0; i < 4; i++) {
