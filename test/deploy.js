@@ -14,7 +14,7 @@ var compiledLibraries = {};
 var gasSpent = 0;
 
 // Database creation param
-var databaseConstructorParam = {"name" : "Database di prova", "private" : true, "verbose" : false};
+var databaseConstructorParam = {"name" : "Database di prova", "private" : true, "verbose" : true};
 
 function unlockAccount(){
     var accounts = web3.eth.accounts;
@@ -203,7 +203,7 @@ function deployDB(bytecode) {
 			console.log('    >>> Mined Database at ' + res.address + ' <<<\n');
 			compiledConstracts["database"]["address"] = res.address;
 			printTotalGas();
-      exportContractJSON();
+			exportContractJSON();
 		} else {
 			console.log('    Database transaction Hash ' + res.transactionHash);
 		}
@@ -262,6 +262,10 @@ function compileDB() {
 	compiledConstracts["database"] = {};
 	compiledConstracts["database"]["bytecode"] = output.contracts['database.sol:Database'].bytecode;
 	compiledConstracts["database"]["abi"] = JSON.parse(output.contracts['database.sol:Database'].interface);
+	
+	compiledConstracts["collection"] = {};
+	compiledConstracts["collection"]["bytecode"] = output.contracts['collection.sol:Collection'].bytecode;
+	compiledConstracts["collection"]["abi"] = JSON.parse(output.contracts['collection.sol:Collection'].interface);
 
 	console.log('    > Waiting for links');
 	deployLibrary(compiledConstracts["database"]["bytecode"], output.contracts, deployDB);
@@ -274,7 +278,8 @@ function printTotalGas() {
 function exportContractJSON() {
   var usefullInfos = {"database": {"abi": compiledConstracts["database"]["abi"],"address": compiledConstracts["database"]["address"]},
                   "driver": {"abi": compiledConstracts["driver"]["abi"],"address": compiledConstracts["driver"]["address"]},
-                  "queryengine": {"abi": compiledConstracts["queryengine"]["abi"],"address": compiledConstracts["queryengine"]["address"]}}
+                  "queryengine": {"abi": compiledConstracts["queryengine"]["abi"],"address": compiledConstracts["queryengine"]["address"]},
+				  "collection": {"abi": compiledConstracts["collection"]["abi"]}}
   jsonfile.writeFileSync("./test/contracts.json", usefullInfos, {spaces: 2})
 }
 

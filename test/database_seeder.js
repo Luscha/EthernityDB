@@ -47,8 +47,13 @@ function createNewCollection(db, collectionName) {
 			console.log(err);
 			return;
 		}
-		console.log('    Collection transaction Hash ' + res);
-		setTimeout(InsertTest, 3000, db, collectionName);
+		if (res.address) {
+			console.log('    >>> Mined Collection at ' + res.address + ' <<<\n');
+		} else {
+			console.log('    Collection transaction Hash ' + res);
+			setTimeout(InsertTest, 3000, db, collectionName);
+		}
+		
 	});
 }
 

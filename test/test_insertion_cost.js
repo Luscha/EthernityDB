@@ -17,6 +17,8 @@ const queriesPlain = [
 				{"asd":2000, "bar":19, "lol": "hedfsdfslkhlaskdjdhlakjhfslkjhfdslkdjfhlkjdshfhheheheheh", "lol2": "hedfsdfslkhlaskdjdhlakjhfslkjhfdslkdjfhlkjdshfhheheheheh", "lol3": "hedfsdfslkhlaskdjdhlakjhfslkjhfdslkdjfhlkjdshfhheheheheh"},
 				{"asd":2000, "bar":19, "lol": "hedfsdfslkhlaskdjdhlakjhfslkjhfdslkdjfhlkjdshfhheheheheh", "lol2": "hedfsdfslkhlaskdjdhlakjhfslkjhfdslkdjfhlkjdshfhheheheheh", "lol3": "hedfsdfslkhlaskdjdhlakjhfslkjhfdslkdjfhlkjdshfhheheheheh", "lol4": "hedfsdfslkhlaskdjdhlakjhfslkjhfdslkdjfhlkjdshfhheheheheh", "lol5": "hedfsdfslkhlaskdjdhlakjhfslkjhfdslkdjfhlkjdshfhheheheheh"},
 				{"asd":2000, "bar":19, "lol": "hedfsdfslkhlaskdjdhlakjhfslkjhfdslkdjfhlkjdshfhheheheheh", "lol2": "hedfsdfslkhlaskdjdhlakjhfslkjhfdslkdjfhlkjdshfhheheheheh", "lol3": "hedfsdfslkhlaskdjdhlakjhfslkjhfdslkdjfhlkjdshfhheheheheh", "lol4": "hedfsdfslkhlaskdjdhlakjhfslkjhfdslkdjfhlkjdshfhheheheheh", "lol5": "hedfsdfslkhlaskdjdhlakjhfslkjhfdslkdjfhlkjdshfhheheheheh", "lol6": "hedfsdfslkhlaskdjdhlakjhfslkjhfdslkdjfhlkjdshfhheheheheh"},
+				/*{"asd":2000, "bar":19, "lol": "hedfsdfslkhlaskdjdhlakjhfslkjhfdslkdjfhlkjdshfhheheheheh", "lol2": "hedfsdfslkhlaskdjdhlakjhfslkjhfdslkdjfhlkjdshfhheheheheh", "lol3": "hedfsdfslkhlaskdjdhlakjhfslkjhfdslkdjfhlkjdshfhheheheheh", "lol4": "hedfsdfslkhlaskdjdhlakjhfslkjhfdslkdjfhlkjdshfhheheheheh", "lol5": "hedfsdfslkhlaskdjdhlakjhfslkjhfdslkdjfhlkjdshfhheheheheh", "lol6": "hedfsdfslkhlaskdjdhlakjhfslkjhfdslkdjfhlkjdshfhheheheheh", "lol7": "hedfsdfslkhlaskdjdhlakjhfslkjhfdslkdjfhlkjdshfhheheheheh"},
+				{"asd":2000, "bar":19, "lol": "hedfsdfslkhlaskdjdhlakjhfslkjhfdslkdjfhlkjdshfhheheheheh", "lol2": "hedfsdfslkhlaskdjdhlakjhfslkjhfdslkdjfhlkjdshfhheheheheh", "lol3": "hedfsdfslkhlaskdjdhlakjhfslkjhfdslkdjfhlkjdshfhheheheheh", "lol4": "hedfsdfslkhlaskdjdhlakjhfslkjhfdslkdjfhlkjdshfhheheheheh", "lol5": "hedfsdfslkhlaskdjdhlakjhfslkjhfdslkdjfhlkjdshfhheheheheh", "lol6": "hedfsdfslkhlaskdjdhlakjhfslkjhfdslkdjfhlkjdshfhheheheheh", "lol7": "hedfsdfslkhlaskdjdhlakjhfslkjhfdslkdjfhlkjdshfhheheheheh", "lol8": "hedfsdfslkhlaskdjdhlakjhfslkjhfdslkdjfhlkjdshfhheheheheh"},*/
 				];
 			  
 const queriesNested = [
@@ -28,7 +30,9 @@ const queriesNested = [
 				{"lol": "hedfsdfslkhlaskdhheheheheh", "foo":{"lol": "hedfsdfslkhlaskdhheheheheh", "foo":{"lol": "hedfsdfslkhlaskdhheheheheh", "foo":{"lol": "hedfsdfslkhlaskdhheheheheh", "foo2":{"lol": "hedfsdfslkhlaskdhheheheheh", "foo3":{"lol": "hedfsdfslkhlaskdhheheheheh"}}}}}},
 				{"lol": "hedfsdfslkhlaskdhheheheheh", "foo":{"lol": "hedfsdfslkhlaskdhheheheheh", "foo":{"lol": "hedfsdfslkhlaskdhheheheheh", "foo":{"lol": "hedfsdfslkhlaskdhheheheheh", "foo2":{"lol": "hedfsdfslkhlaskdhheheheheh", "foo3":{"lol": "hedfsdfslkhlaskdhheheheheh", "foo4":{"lol": "hedfsdfslkhlaskdhheheheheh"}}}}}}},
 				{"lol": "hedfsdfslkhlaskdhheheheheh", "foo":{"lol": "hedfsdfslkhlaskdhheheheheh", "foo":{"lol": "hedfsdfslkhlaskdhheheheheh", "foo":{"lol": "hedfsdfslkhlaskdhheheheheh", "foo2":{"lol": "hedfsdfslkhlaskdhheheheheh", "foo3":{"lol": "hedfsdfslkhlaskdhheheheheh", "foo4":{"lol": "hedfsdfslkhlaskdhheheheheh", "foo5":{"lol": "hedfsdfslkhlaskdhheheheheh"}}}}}}}},
-				{"lol": "hedfsdfslkhlaskdhheheheheh", "foo":{"lol": "hedfsdfslkhlaskdhheheheheh", "foo":{"lol": "hedfsdfslkhlaskdhheheheheh", "foo":{"lol": "hedfsdfslkhlaskdhheheheheh", "foo2":{"lol": "hedfsdfslkhlaskdhheheheheh", "foo3":{"lol": "hedfsdfslkhlaskdhheheheheh", "foo4":{"lol": "hedfsdfslkhlaskdhheheheheh", "foo5":{"lol": "hedfsdfslkhlaskdhheheheheh", "foo6":{"lol": "hedfsdfslkhlaskdhheheheheh"}}}}}}}}}
+				{"lol": "hedfsdfslkhlaskdhheheheheh", "foo":{"lol": "hedfsdfslkhlaskdhheheheheh", "foo":{"lol": "hedfsdfslkhlaskdhheheheheh", "foo":{"lol": "hedfsdfslkhlaskdhheheheheh", "foo2":{"lol": "hedfsdfslkhlaskdhheheheheh", "foo3":{"lol": "hedfsdfslkhlaskdhheheheheh", "foo4":{"lol": "hedfsdfslkhlaskdhheheheheh", "foo5":{"lol": "hedfsdfslkhlaskdhheheheheh", "foo6":{"lol": "hedfsdfslkhlaskdhheheheheh"}}}}}}}}},
+				/*{"lol": "hedfsdfslkhlaskdhheheheheh", "foo":{"lol": "hedfsdfslkhlaskdhheheheheh", "foo":{"lol": "hedfsdfslkhlaskdhheheheheh", "foo":{"lol": "hedfsdfslkhlaskdhheheheheh", "foo2":{"lol": "hedfsdfslkhlaskdhheheheheh", "foo3":{"lol": "hedfsdfslkhlaskdhheheheheh", "foo4":{"lol": "hedfsdfslkhlaskdhheheheheh", "foo5":{"lol": "hedfsdfslkhlaskdhheheheheh", "foo6":{"lol": "hedfsdfslkhlaskdhheheheheh", "foo7":{"lol": "hedfsdfslkhlaskdhheheheheh"}}}}}}}}}},
+				{"lol": "hedfsdfslkhlaskdhheheheheh", "foo":{"lol": "hedfsdfslkhlaskdhheheheheh", "foo":{"lol": "hedfsdfslkhlaskdhheheheheh", "foo":{"lol": "hedfsdfslkhlaskdhheheheheh", "foo2":{"lol": "hedfsdfslkhlaskdhheheheheh", "foo3":{"lol": "hedfsdfslkhlaskdhheheheheh", "foo4":{"lol": "hedfsdfslkhlaskdhheheheheh", "foo5":{"lol": "hedfsdfslkhlaskdhheheheheh", "foo6":{"lol": "hedfsdfslkhlaskdhheheheheh", "foo7":{"lol": "hedfsdfslkhlaskdhheheheheh", "foo8":{"lol": "hedfsdfslkhlaskdhheheheheh"}}}}}}}}}}}*/
               ];
 
 function unlockAccount(){
@@ -46,8 +50,8 @@ function buildDBContract(dbInfos) {
 	return db.at(dbInfos["address"]);
 }
 
-function InsertCostTest(db, collectionName) {
-	console.log('------------ Insertion of plain document Test ------------');
+function InsertCostTest(db, collectionName, type) {
+	console.log('------------ Insertion of plain document Test ' + type + ' ------------');
 
   queriesPlain.forEach((q, index) => {
     var hexQ = hexStringToHexArray(bson.serialize(q).toString('hex'));
@@ -59,8 +63,8 @@ function InsertCostTest(db, collectionName) {
   });
 }
 
-function InsertNestedCostTest(db, collectionName) {
-	console.log('------------ Insertion of plain document Test ------------');
+function InsertNestedCostTest(db, collectionName, type) {
+	console.log('------------ Insertion of nested document Test ' + type + ' ------------');
 
   queriesNested.forEach((q, index) => {
     var hexQ = hexStringToHexArray(bson.serialize(q).toString('hex'));
@@ -100,11 +104,11 @@ function main () {
 	var dbInstance = buildDBContract(compiledConstracts["database"]);
 	var dbVerboseInstance = buildDBContract(compiledConstracts["database_verbose"]);
 	
-	InsertCostTest(dbInstance, "a");
-	InsertCostTest(dbVerboseInstance, "a");
+	InsertCostTest(dbInstance, "a", "NON-VERBOSE");
+	InsertCostTest(dbVerboseInstance, "a", "VERBOSE");
 	
-	InsertNestedCostTest(dbInstance, "a");
-	InsertNestedCostTest(dbVerboseInstance, "a");
+	InsertNestedCostTest(dbInstance, "a", "NON-VERBOSE");
+	InsertNestedCostTest(dbVerboseInstance, "a", "VERBOSE");
 }
 
 main();
