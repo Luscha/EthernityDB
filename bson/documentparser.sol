@@ -53,7 +53,7 @@ library DocumentParser {
     }
   }
 
-  function getDocumentTree(byte[] memory data) constant internal returns (TreeFlat.TreeRoot tree) {
+  function getDocumentTree(byte[] memory data) constant internal returns (TreeFlat.TreeRoot memory tree) {
     tree = TreeFlat.newRoot();
     if (data.length < 4) {
       return;
