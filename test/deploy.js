@@ -14,7 +14,7 @@ var compiledLibraries = {};
 var gasSpent = 0;
 
 // Database creation param
-var databaseConstructorParam = {"name" : "Database di prova", "private" : true, "verbose" : true};
+var databaseConstructorParam = {"name" : "Database di prova", "flags" : [false, true, true]};
 
 function unlockAccount(){
     var accounts = web3.eth.accounts;
@@ -47,10 +47,10 @@ function findImports(path) {
 
 function printErrors(bytecode) {
 	var hasErrors = false;
-	for (var error in bytecode.formal.errors) {
+	//for (var error in bytecode.formal.errors) {
 		//console.log(bytecode.formal.errors[error]);
-		hasErrors = true;
-	}
+		//hasErrors = true;
+	//}
 	return false;
 }
 
@@ -181,8 +181,7 @@ function deployDB(bytecode) {
 	compiledConstracts["database"]["bytecode"] = bytecode;
 
 	var dbBytecode = db.new.getData(databaseConstructorParam["name"],
-													databaseConstructorParam["private"],
-													databaseConstructorParam["verbose"],
+													databaseConstructorParam["flags"],
 													compiledConstracts["driver"]["address"],
 													{data: '0x' + bytecode});
 
@@ -262,7 +261,7 @@ function compileDB() {
 	compiledConstracts["database"] = {};
 	compiledConstracts["database"]["bytecode"] = output.contracts['database.sol:Database'].bytecode;
 	compiledConstracts["database"]["abi"] = JSON.parse(output.contracts['database.sol:Database'].interface);
-	
+
 	compiledConstracts["collection"] = {};
 	compiledConstracts["collection"]["bytecode"] = output.contracts['collection.sol:Collection'].bytecode;
 	compiledConstracts["collection"]["abi"] = JSON.parse(output.contracts['collection.sol:Collection'].interface);

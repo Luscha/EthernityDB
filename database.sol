@@ -9,7 +9,7 @@ contract Database is DBAbstract {
   using StringUtils for string;
   using Flag for uint32;
 
-  enum dbFlags {PRIVATE, VERBOSE}
+  enum dbFlags {PRIVATE, VERBOSE, ALLOWPREID}
 
   mapping (uint64 => bytes8) private collectionsIDByIndex;
   mapping (bytes8 => CollectionAbstract) private collectionsByName;
@@ -26,14 +26,19 @@ contract Database is DBAbstract {
         _;
   }
 
-  function Database(string strName, bool bPrivate, bool bVerbose, DriverAbstract _driver) {
+  function Database(string strName, bool[] flags, DriverAbstract _driver) {
     owner = msg.sender;
     name = strName;
 
-    if (bPrivate)
-      flag = flag.setBit(uint8(dbFlags.PRIVATE));
-    if (bVerbose)
+    if (flags[0] == true) {
       flag = flag.setBit(uint8(dbFlags.VERBOSE));
+    }
+    if (flags[1] == true) {
+      flag = flag.setBit(uint8(dbFlags.PRIVATE));
+    }
+    if (flags[2] == true) {
+      flag = flag.setBit(uint8(dbFlags.ALLOWPREID));
+    }
 
     driver = _driver;
     driver.registerDatabase(owner, strName, this);
@@ -41,18 +46,29 @@ contract Database is DBAbstract {
 
   function setVerbose(bool _flag) {
     require(msg.sender == owner);
-    if (true == _flag)
+    if (true == _flag) {
       flag = flag.setBit(uint8(dbFlags.VERBOSE));
-    else
+    } else {
       flag = flag.removeBit(uint8(dbFlags.VERBOSE));
+    }
   }
 
   function setPrivate(bool _flag) {
     require(msg.sender == owner);
-    if (true == _flag)
+    if (true == _flag) {
       flag = flag.setBit(uint8(dbFlags.PRIVATE));
-    else
+    } else {
       flag = flag.removeBit(uint8(dbFlags.PRIVATE));
+    }
+  }
+
+  function setPreIDs(bool _flag) {
+    require(msg.sender == owner);
+    if (true == _flag) {
+      flag = flag.setBit(uint8(dbFlags.ALLOWPREID));
+    } else {
+      flag = flag.removeBit(uint8(dbFlags.ALLOWPREID));
+    }
   }
 
   function isVerbose() constant returns (bool) {
@@ -64,7 +80,7 @@ contract Database is DBAbstract {
   }
 
   function allowsPreIDs() constant returns (bool) {
-    return !isVerbose() || isPrivate();
+    return flag.isBit(uint8(dbFlags.ALLOWPREID));
   }
 
   function getName() constant returns (string) {
@@ -79,7 +95,7 @@ contract Database is DBAbstract {
     id = c.getDocumentIDbyIndex(index);
     data = new bytes(c.getDocumentLengthbyIndex(index));
     for (uint32 i = 0; i < c.getDocumentLengthbyIndex(index); i++) {
-    data[i] = c.getDocumentByteAt(id, i);
+      data[i] = c.getDocumentByteAt(id, i);
     }
   }
 

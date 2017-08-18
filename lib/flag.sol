@@ -14,6 +14,6 @@ library Flag {
   }
 
   function isBit(uint32 self, uint8 bit) returns (bool) {
-    return self & (uint32(1) << bit) == (uint32(1) << bit);
+    return (self & (uint32(1) << bit)) != uint32(0);
   }
 }
