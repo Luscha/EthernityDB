@@ -33,6 +33,10 @@ function findImports(path) {
 		return { contents: fs.readFileSync('./lib/bytesUtils.sol').toString() }
 	else if (path === 'lib/flag.sol')
 		return { contents: fs.readFileSync('./lib/flag.sol').toString() }
+  else if (path === 'factory/collectionfactory.sol')
+		return { contents: fs.readFileSync('./factory/collectionfactory.sol').toString() }
+  else if (path === 'factory/databasefactory.sol')
+		return { contents: fs.readFileSync('./factory/databasefactory.sol').toString() }
 	else if (path === 'interfaces.sol')
 		return { contents: fs.readFileSync('./interfaces.sol').toString() }
 	else if (path === 'document.sol')
@@ -168,6 +172,36 @@ function deployDriver(bytecode) {
 		if (res.address) {
 			console.log('    >>> Mined Driver at ' + res.address + ' <<<\n');
 			compiledConstracts["driver"]["address"] = res.address;
+			compileCollectionFatory();
+		} else {
+			console.log('    Driver transaction Hash ' + res.transactionHash);
+		}
+	});
+}
+
+function deployCollectionFatory(bytecode) {
+	console.log('------------ Deploying Collection Factory ------------');
+	var driver = web3.eth.contract(compiledConstracts["driver"]["abi"]);
+	compiledConstracts["collectionfactory"]["bytecode"] = bytecode;
+
+	var driverBytecode = driver.new.getData({data: '0x' + bytecode});
+
+	var estimate = web3.eth.estimateGas({data: '0x' + bytecode})
+	console.log('    Estimated gas to deploy Collection Factory = ' + estimate);
+	gasSpent += estimate + fee;
+
+	var driverInstance = driver.new({
+		data: driverBytecode,
+		from: web3.eth.coinbase,
+		gas: estimate + fee}, (err, res) => {
+		if (err) {
+			console.log(err);
+			return;
+		}
+
+		if (res.address) {
+			console.log('    >>> Mined Collection Factory at ' + res.address + ' <<<\n');
+			compiledConstracts["collectionfactory"]["address"] = res.address;
 			compileDB();
 		} else {
 			console.log('    Driver transaction Hash ' + res.transactionHash);
@@ -183,6 +217,7 @@ function deployDB(bytecode) {
 	var dbBytecode = db.new.getData(databaseConstructorParam["name"],
 													databaseConstructorParam["flags"],
 													compiledConstracts["driver"]["address"],
+                          compiledConstracts["collectionfactory"]["address"],
 													{data: '0x' + bytecode});
 
 	var estimate = web3.eth.estimateGas({data: dbBytecode});
@@ -247,6 +282,30 @@ function compileDriver() {
 	deployLibrary(compiledConstracts["driver"]["bytecode"], output.contracts, deployDriver);
 }
 
+function compileCollectionFatory() {
+	console.log('------------ Compiling Collection Factory ------------');
+	var input = {
+		'factory/collectionfactory.sol' : fs.readFileSync('./factory/collectionfactory.sol').toString(),
+	}
+
+	var output = solc.compile({sources : input}, 1, findImports);
+
+	if (true == printErrors(output)) {
+		return;
+	}
+
+	compiledConstracts["collectionfactory"] = {};
+	compiledConstracts["collectionfactory"]["bytecode"] = output.contracts['factory/collectionfactory.sol:CollectionFactory'].bytecode;
+	compiledConstracts["collectionfactory"]["abi"] = JSON.parse(output.contracts['factory/collectionfactory.sol:CollectionFactory'].interface);
+
+  compiledConstracts["collection"] = {};
+	compiledConstracts["collection"]["bytecode"] = output.contracts['collection.sol:Collection'].bytecode;
+	compiledConstracts["collection"]["abi"] = JSON.parse(output.contracts['collection.sol:Collection'].interface);
+  
+	console.log('    > Waiting for links');
+	deployLibrary(compiledConstracts["collectionfactory"]["bytecode"], output.contracts, deployCollectionFatory);
+}
+
 function compileDB() {
 	console.log('------------ Compiling Database ------------');
 	var input = {
@@ -262,10 +321,6 @@ function compileDB() {
 	compiledConstracts["database"]["bytecode"] = output.contracts['database.sol:Database'].bytecode;
 	compiledConstracts["database"]["abi"] = JSON.parse(output.contracts['database.sol:Database'].interface);
 
-	compiledConstracts["collection"] = {};
-	compiledConstracts["collection"]["bytecode"] = output.contracts['collection.sol:Collection'].bytecode;
-	compiledConstracts["collection"]["abi"] = JSON.parse(output.contracts['collection.sol:Collection'].interface);
-
 	console.log('    > Waiting for links');
 	deployLibrary(compiledConstracts["database"]["bytecode"], output.contracts, deployDB);
 }
@@ -278,7 +333,9 @@ function exportContractJSON() {
   var usefullInfos = {"database": {"abi": compiledConstracts["database"]["abi"],"address": compiledConstracts["database"]["address"]},
                   "driver": {"abi": compiledConstracts["driver"]["abi"],"address": compiledConstracts["driver"]["address"]},
                   "queryengine": {"abi": compiledConstracts["queryengine"]["abi"],"address": compiledConstracts["queryengine"]["address"]},
-				  "collection": {"abi": compiledConstracts["collection"]["abi"]}}
+                  "collectionfactory": {"abi": compiledConstracts["collectionfactory"]["abi"],"address": compiledConstracts["collectionfactory"]["address"]},
+				          "collection": {"abi": compiledConstracts["collection"]["abi"]}
+                }
   jsonfile.writeFileSync("./test/contracts.json", usefullInfos, {spaces: 2})
 }
 

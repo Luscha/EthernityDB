@@ -38,3 +38,11 @@ interface CollectionAbstract {
 
   function insertDocument(bytes12 id, byte[] data);
 }
+
+interface DatabaseFactoryAbstract {
+  function createDatabase(string name, bool[] flags, DriverAbstract driver, CollectionFactoryAbstract cf) returns (DBAbstract);
+}
+
+interface CollectionFactoryAbstract {
+  function createCollection(string name, DBAbstract db) returns (CollectionAbstract);
+}

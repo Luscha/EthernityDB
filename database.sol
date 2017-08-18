@@ -3,7 +3,6 @@ pragma solidity ^0.4.11;
 import "lib/stringUtils.sol";
 import "lib/flag.sol";
 import "interfaces.sol";
-import "collection.sol";
 
 contract Database is DBAbstract {
   using StringUtils for string;
@@ -15,6 +14,8 @@ contract Database is DBAbstract {
   mapping (bytes8 => CollectionAbstract) private collectionsByName;
 
   DriverAbstract private driver;
+  CollectionFactoryAbstract private collectionFactory;
+
   address private owner;
   string private name;
 
@@ -26,7 +27,7 @@ contract Database is DBAbstract {
         _;
   }
 
-  function Database(string strName, bool[] flags, DriverAbstract _driver) {
+  function Database(string strName, bool[] flags, DriverAbstract d, CollectionFactoryAbstract cf) {
     owner = msg.sender;
     name = strName;
 
@@ -40,7 +41,8 @@ contract Database is DBAbstract {
       flag = flag.setBit(uint8(dbFlags.ALLOWPREID));
     }
 
-    driver = _driver;
+    driver = d;
+    collectionFactory = cf;
     driver.registerDatabase(owner, strName, this);
   }
 
@@ -123,6 +125,17 @@ contract Database is DBAbstract {
   }
 
   ////////////////////////////////////////////
+  /// Collection Fatory Related
+  function changeCollectionFactory(CollectionFactoryAbstract newFC) {
+    require(msg.sender == owner);
+    collectionFactory = newFC;
+  }
+
+  function getCollectionFactory() constant returns (CollectionFactoryAbstract) {
+    return collectionFactory;
+  }
+
+  ////////////////////////////////////////////
   /// Database Related
   function migrateDatabase(DBAbstract to) {
     require(tx.origin == owner);
@@ -147,7 +160,7 @@ contract Database is DBAbstract {
     require(false == isPrivate() || msg.sender == owner);
     require(address(getCollection(strName)) == 0x0);
 
-    Collection c = new Collection(strName, this);
+    CollectionAbstract c = collectionFactory.createCollection(strName, this);
     collectionsByName[bytes8(strName.toBytes32())] = c;
     collectionsIDByIndex[collectionCount++] = bytes8(strName.toBytes32());
     return c;
