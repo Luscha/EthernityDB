@@ -10,6 +10,8 @@ contract Collection is CollectionAbstract {
   uint64 private count;
   string private name;
 
+  string public version = "master-1.0.0";
+
   function Collection(string _name, DBAbstract _db) {
     db = _db;
     name = _name;

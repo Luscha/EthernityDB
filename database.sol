@@ -22,6 +22,8 @@ contract Database is DBAbstract {
   uint64 private collectionCount;
   uint32 private flag;
 
+  string public version = "master-1.0.0";
+
   modifier OnlyDriver {
       require(msg.sender == address(driver));
         _;

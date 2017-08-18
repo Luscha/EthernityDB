@@ -8,6 +8,8 @@ library DocumentParser {
   using DocumentParser for bytes32;
   using TreeFlat for TreeFlat.TreeRoot;
 
+  string public version = "master-1.0.0";
+
   function nextKeyValue(byte[] memory d, uint32 i) constant internal returns (uint8 t, bytes8 n, uint32 l, uint32 s) {
     t = d.getKeyValueType(i);
     if (t == 0x0) {

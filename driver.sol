@@ -15,6 +15,8 @@ contract Driver is DriverAbstract {
   bytes3 constant idKeyName = 0x5F6964;
   QueryEngine queryEngine;
 
+  string public version = "master-1.0.0";
+
   function Driver (QueryEngine qe) {
     queryEngine = qe;
   }
