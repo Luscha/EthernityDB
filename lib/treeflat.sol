@@ -1,6 +1,9 @@
 pragma solidity ^0.4.11;
 
 library TreeFlat {
+
+  string public version = "master-1.0.0";
+  
   struct TreeRoot {
     TreeNode[] nodes;
     uint32 current;

@@ -12,6 +12,8 @@ contract QueryEngine {
   byte constant or = 0x7c;
   byte constant eq = 0x25;
 
+  string public version = "master-1.0.0";
+
   function processQuery(byte[] query, byte[] data) constant returns (bool) {
   //function processQuery(byte[] query, byte[] data) constant returns (bool) {
     TreeFlat.TreeRoot memory treeDoc = data.getDocumentTree();

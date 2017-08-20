@@ -10,10 +10,20 @@ contract Collection is CollectionAbstract {
   uint64 private count;
   string private name;
 
+<<<<<<< HEAD
+  string private version = "master-1.0.0";
+=======
+  string public version = "master-1.0.0";
+>>>>>>> 2a6bf53467ac80a950efa8abfee2ced4b6abdaf0
+
   function Collection(string _name, DBAbstract _db) {
     db = _db;
     name = _name;
     count = 0;
+  }
+
+  function getVersion() constant returns (string) {
+    return version;
   }
 
   function changeDB(DBAbstract _db) {

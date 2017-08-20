@@ -22,6 +22,12 @@ contract Database is DBAbstract {
   uint64 private collectionCount;
   uint32 private flag;
 
+<<<<<<< HEAD
+  string private version = "master-1.0.0";
+=======
+  string public version = "master-1.0.0";
+>>>>>>> 2a6bf53467ac80a950efa8abfee2ced4b6abdaf0
+
   modifier OnlyDriver {
       require(msg.sender == address(driver));
         _;
@@ -44,6 +50,10 @@ contract Database is DBAbstract {
     driver = d;
     collectionFactory = cf;
     driver.registerDatabase(owner, strName, this);
+  }
+
+  function getVersion() constant returns (string) {
+    return version;
   }
 
   function setVerbose(bool _flag) {

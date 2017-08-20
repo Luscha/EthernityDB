@@ -1,6 +1,8 @@
 pragma solidity ^0.4.11;
 
 interface DriverAbstract {
+  function getVersion() constant returns (string);
+
   function registerDatabase(address owner, string strName, DBAbstract db);
   function getDatabase(address owner, string strName) constant returns (DBAbstract);
 
@@ -9,7 +11,9 @@ interface DriverAbstract {
 }
 
 interface DBAbstract {
-  function changeDriver(DriverAbstract newDriver);
+  function getVersion() constant returns (string);
+
+  function changeDriver(DriverAbstract);
   function getDriver() constant returns (DriverAbstract);
 
   function getName() constant returns (string);
@@ -28,7 +32,9 @@ interface DBAbstract {
 }
 
 interface CollectionAbstract {
-  function changeDB(DBAbstract db);
+  function getVersion() constant returns (string);
+
+  function changeDB(DBAbstract);
   function getDocumentCount() constant returns (uint64);
   function getName() constant returns (string);
 
@@ -40,9 +46,11 @@ interface CollectionAbstract {
 }
 
 interface DatabaseFactoryAbstract {
+  function getVersion() constant returns (string);
   function createDatabase(string name, bool[] flags, DriverAbstract driver, CollectionFactoryAbstract cf) returns (DBAbstract);
 }
 
 interface CollectionFactoryAbstract {
+  function getVersion() constant returns (string);
   function createCollection(string name, DBAbstract db) returns (CollectionAbstract);
 }
