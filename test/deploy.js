@@ -51,10 +51,10 @@ function findImports(path) {
 
 function printErrors(bytecode) {
 	var hasErrors = false;
-	//for (var error in bytecode.formal.errors) {
-		//console.log(bytecode.formal.errors[error]);
-		//hasErrors = true;
-	//}
+	for (var error in bytecode.errors) {
+		console.log(bytecode.errors[error]);
+		hasErrors = true;
+	}
 	return false;
 }
 
@@ -301,7 +301,7 @@ function compileCollectionFatory() {
   compiledConstracts["collection"] = {};
 	compiledConstracts["collection"]["bytecode"] = output.contracts['collection.sol:Collection'].bytecode;
 	compiledConstracts["collection"]["abi"] = JSON.parse(output.contracts['collection.sol:Collection'].interface);
-  
+
 	console.log('    > Waiting for links');
 	deployLibrary(compiledConstracts["collectionfactory"]["bytecode"], output.contracts, deployCollectionFatory);
 }
