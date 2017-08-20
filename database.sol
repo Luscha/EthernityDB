@@ -153,11 +153,11 @@ contract Database is DBAbstract {
     }
   }
 
-  function receiveMigratingCollection(CollectionAbstract c, bytes8 name) {
+  function receiveMigratingCollection(CollectionAbstract c, bytes8 cName) {
     require(tx.origin == owner);
     require(address(c) != 0x0);
-    collectionsByName[name] = c;
-    collectionsIDByIndex[collectionCount++] = name;
+    collectionsByName[cName] = c;
+    collectionsIDByIndex[collectionCount++] = cName;
   }
 
   ////////////////////////////////////////////
