@@ -1,6 +1,5 @@
-# EthernityDB
-![Ethereum Project](https://chocolatey.org/content/packageimages/AlethZero-Latest.0.8.2.54-latest.png)
-![BSON](http://i64.tinypic.com/2wnu3qr.png)
+![EthernityDB](resources/logo_name.png)
+![EthernityDB Logo](resources/logo_small.png)
 
 A NoSQL Document based DB implementation on top of the Ethereum Project blockchain.
 
@@ -56,18 +55,23 @@ const Web3 = require('web3');
 // Connect to Ethereum node
 const web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
 
-... // deploy driver, compile database.sol contract get ABI
+... // deploy driver, deploy the collection factory, compile database.sol contract get ABI
 var dbABI = ... // ABI
 var dbBytecode = ... // Bytecode of the database.sol contract
+
 var driverAddress = ... // Address of the driver contract
+var collectionFactoryAddress = ... // Address of the collection contract
 
 var dbName = ... // Name of your database
-var private = ... // True if only you can insert document, false otherwise
-var verbose = ... // True if you the validation of the insert data is required (doubles the fee)
+var databaseFlags = [/*verbose*/, /*private*/, /*allowPreID*/];
+// verbose -> True if only you can insert document, false otherwise
+// private-> True if you the validation of the insert data is required (doubles the fee)
+// allowPreID-> True if the user is allowed to insert documents with custom objectID
+
 var db = web3.eth.contract(dbABI);
 
-var dbBytecodeConstructed = db.new.getData(dbName, private, verbose, driverAddress,
-                        {data: '0x' + bytecode});
+var dbBytecodeConstructed = db.new.getData(dbName, databaseFlags, driverAddress,
+                                collectionFactoryAddress, {data: '0x' + bytecode});
 ... // Deploy database
 ```
 
